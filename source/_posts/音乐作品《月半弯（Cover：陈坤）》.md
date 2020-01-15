@@ -1,0 +1,43 @@
+---
+title: 音乐作品《月半弯（Cover：陈坤）》
+date: 2020-01-15 15:23:33
+thumbnail: https://gss0.bdstatic.com/94o3dSag_xI4khGkpoWK1HF6hhy/baike/w%3D268%3Bg%3D0/sign=5c9afd9de1f81a4c2632ebcfef110764/a5c27d1ed21b0ef44b7cd7b7d7c451da80cb3e46.jpg
+categories:
+  - 音乐作品
+  - 流行歌曲改编
+tags:
+  - R&B
+---
+
+&emsp;&emsp;这是一首普通的流行歌曲，由郝雷作词作曲，张学友演唱，1985 年发行，我把它改编成了偏 R&B 的风格。和弦方面没有太大的改动，最多就是在原有和弦加了几个色彩音！
+&emsp;&emsp;第一次接触到这首歌是听了皮皮改编的版本，他改编成的风格好像是 Soul，听了之后我就喜欢上了这首歌。个人比较喜欢皮皮改编的版本，毕竟二十年前的编曲实在难征服我的耳朵！
+
+<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1394618989&auto=0&height=66"></iframe>
+<!--more-->
+
+### 歌词
+
+作曲: 郝雷
+作词: 郝雷
+改编：木荣
+编曲：木荣
+那夜真的好浪漫
+我带你去看月半弯
+有点害羞 却很幸福
+这种感觉我很喜欢
+
+让我温柔靠近你身边
+你也轻轻陷入我臂弯
+感觉爱情 悄悄来临
+纷纷扰扰与我无关
+
+夜色中两人用渴望
+眼神交换
+原来恋爱现场感觉
+不像想的那样主观
+
+月半弯 好浪漫
+月光下的你显得特别的好看
+月半弯 我喜欢
+有情 有意 有你
+还有甜
