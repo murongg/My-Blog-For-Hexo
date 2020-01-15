@@ -1,5 +1,5 @@
 ---
-title: 音乐作品《我只在乎你（Cover：邓丽君）
+title: 音乐作品《我只在乎你（Cover：邓丽君）》
 date: 2020-01-15 16:10:12
 thumbnail: https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=856710910,2362185324&fm=26&gp=0.jpg
 categories:
@@ -19,8 +19,8 @@ tags:
 
 ### 歌词
 
-作曲: 荒木とよひさ
-作词: 三木たかし
+作曲：荒木とよひさ
+作词：三木たかし
 改编：木荣
 如果没有遇见你
 我将会是在哪里
