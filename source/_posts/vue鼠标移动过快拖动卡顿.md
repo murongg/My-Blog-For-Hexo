@@ -17,7 +17,7 @@ tags:
 ## 踩到的坑
 
 使用@mousemove 绑定事件拖拽速度过快有严重的卡顿
-![未优化之前效果图](https://upload-images.jianshu.io/upload_images/15921555-2600111b5828db07.gif?imageMogr2/auto-orient/strip)
+![未优化之前效果图](https://s2.ax1x.com/2020/01/19/19zkeU.gif)
 
 <!--more-->
 
@@ -200,6 +200,6 @@ tags:
 
 ### 优化后效果
 
-![优化后效果](https://upload-images.jianshu.io/upload_images/15921555-6c3950ec591e22ff.gif?imageMogr2/auto-orient/strip)
+![优化后效果](https://s2.ax1x.com/2020/01/19/19z6Yj.gif)
 
 ## Ending......

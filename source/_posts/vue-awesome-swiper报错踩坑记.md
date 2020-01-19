@@ -11,7 +11,7 @@ tags:
 ---
 
 nuxt.js 引入 vue-awesome-swiper 后，控制台报错**window is not defined**
-![window is not defined](https://upload-images.jianshu.io/upload_images/15101357-9cb89cba7b40fcbd.png?imageMogr2/auto-orient/strip|imageView2/2/w/1200/format/webp)
+![window is not defined](https://s2.ax1x.com/2020/01/19/1CS9tH.jpg)
 
 ### 原因：
 
@@ -19,13 +19,15 @@ Nuxt 在服务端渲染时找不到 window
 
 <!--more-->
 
-### 查询官网文档：![mount with ssr](https://upload-images.jianshu.io/upload_images/15921555-80453c695ade306e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+### 查询官网文档：
 
-![SSR](https://upload-images.jianshu.io/upload_images/15921555-4a0148911687516f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![mount with ssr](https://s2.ax1x.com/2020/01/19/1CSF1I.png)
+
+![SSR](https://s2.ax1x.com/2020/01/19/1CSeHS.png)
 
 ### 解决办法：
 
-在 nuxt 的 plugins 目录下新建 vue-awesome-swiper.js 文件，代码如下：![vue-awesome-swiper.js](https://upload-images.jianshu.io/upload_images/15921555-2cbfcb935b027c50.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+在 nuxt 的 plugins 目录下新建 vue-awesome-swiper.js 文件，代码如下：![vue-awesome-swiper.js](https://s2.ax1x.com/2020/01/19/1CSl3n.png)
 
 ```javascript
 import Vue from "vue";
@@ -37,7 +39,7 @@ if (process.browser) {
 ```
 
 修改 nuxt.config.js 的 plugins 配置：
-![nuxt.config.js](https://upload-images.jianshu.io/upload_images/15921555-31a870eeaabca83a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![nuxt.config.js](https://s2.ax1x.com/2020/01/19/1CSGuV.png)
 
 在 nuxt.config.js 的 plugins 里加入：
 

@@ -1,48 +1,56 @@
 ---
 title: 爬取某站所有性感美女图片（Python版）
 date: 2020-01-18 19:20:20
-thumbnail: https://upload-images.jianshu.io/upload_images/15921555-f8e0ba49e279ce46.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240
+thumbnail: https://s2.ax1x.com/2020/01/19/1CS6HO.png
 categories:
   - python
 tags:
   - 爬虫
 ---
 
-## Python版
+## Python 版
 
 ### 环境
+
 - python3.7
 - pip19.3
 
 ### 依赖
+
 - requests
 - pyquery
 - os
 
 ### 前期准备
+
 #### 引入所需依赖
-``` python
+
+```python
 import requests
 import os
 from requests.packages import urllib3
 from pyquery import PyQuery as pq
 ```
+<!--more-->
+### headers 设置（重要）
 
-### headers设置（重要）
-``` js
+```js
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) '
                   'AppleWebKit/537.36 (KHTML, like Gecko)'
                   'Chrome/58.0.3029.110 Safari/537.36'
 }
 ```
+
 ### 目标站
+
 http://www.umei.cc/p/gaoqing/cn/
-![目标站截图](https://upload-images.jianshu.io/upload_images/15921555-b40d807427b87db7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-![](https://upload-images.jianshu.io/upload_images/15921555-f8e0ba49e279ce46.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![目标站截图](https://s2.ax1x.com/2020/01/19/1CS2Ue.png)
+![](https://s2.ax1x.com/2020/01/19/1CS6HO.png)
 
 ### 获取需要爬取页面的地址
-``` python
+
+```python
 def get_detail(url):
     """
     获取需要爬取页面的地址
@@ -67,8 +75,10 @@ def get_detail(url):
             end_list.append(url_result.split('.htm')[0])
     return end_list
 ```
+
 ### 获取每一页所有图片
-``` python
+
+```python
 def get_img(url):
     """
     获取每一页所有图片
@@ -106,8 +116,10 @@ def get_img(url):
     except:
         print("爬取失败")
 ```
-### main主函数
-``` python
+
+### main 主函数
+
+```python
 if __name__ == '__main__':
     z = 1
     n = 1
@@ -128,6 +140,8 @@ if __name__ == '__main__':
                 if is_end == True:
                     break
 ```
+
 ## 成果
-![文件夹](https://upload-images.jianshu.io/upload_images/15921555-82b126d9d896255f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-![文件个数](https://upload-images.jianshu.io/upload_images/15921555-057cefad8cb68637.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+![文件夹](https://s2.ax1x.com/2020/01/19/1CSoKP.png)
+![文件个数](https://s2.ax1x.com/2020/01/19/1CSXCj.png)

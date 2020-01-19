@@ -1,7 +1,7 @@
 ---
 title: 音乐作品《月半弯（Cover：陈坤）》
 date: 2020-01-15 15:23:33
-thumbnail: https://gss0.bdstatic.com/94o3dSag_xI4khGkpoWK1HF6hhy/baike/w%3D268%3Bg%3D0/sign=5c9afd9de1f81a4c2632ebcfef110764/a5c27d1ed21b0ef44b7cd7b7d7c451da80cb3e46.jpg
+thumbnail: https://s2.ax1x.com/2020/01/19/1CSUN4.jpg
 categories:
   - 音乐作品
   - 流行歌曲改编

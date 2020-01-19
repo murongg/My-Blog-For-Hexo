@@ -37,6 +37,6 @@ watch: {
 
 ## 原因
 
-![](https://upload-images.jianshu.io/upload_images/15921555-497f8f2609da3308.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](https://s2.ax1x.com/2020/01/19/19zSWn.png)
 
 总的来说还是 this 指向问题，可以查看[普通函数与箭头函数 this 指向问题](https://www.cnblogs.com/qdlhj/p/9877881.html)
