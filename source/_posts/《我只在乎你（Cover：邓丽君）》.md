@@ -3,8 +3,8 @@ title: 音乐作品《我只在乎你（Cover：邓丽君）》
 date: 2020-01-15 16:10:12
 thumbnail: https://s2.ax1x.com/2020/01/19/1CpprV.jpg
 categories:
+  - 音乐世界
   - 音乐作品
-  - 流行歌曲改编
 tags:
   - Jazz
 ---

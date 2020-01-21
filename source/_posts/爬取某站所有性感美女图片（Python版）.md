@@ -3,6 +3,7 @@ title: 爬取某站所有性感美女图片（Python版）
 date: 2020-01-18 19:20:20
 thumbnail: https://s2.ax1x.com/2020/01/19/1CS6HO.png
 categories:
+  - 程序世界
   - python
 tags:
   - 爬虫
