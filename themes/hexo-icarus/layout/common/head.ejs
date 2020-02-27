@@ -1,0 +1,57 @@
+<!--
+ * @Author: MuRong
+ * @Date: 2020-02-27 18:55:43
+ * @LastEditors: MuRong
+ * @LastEditTime: 2020-02-27 19:14:51
+ * @Description: 
+ * @FilePath: \My-Blog-For-Hexo\themes\icarus\layout\common\head.ejs
+ -->
+<meta charset="utf-8" />
+<% if (get_config('meta_generator', true)) { %>
+<meta name="generator" content="Hexo <%= hexo_version() %>" />
+<% } %>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<%- meta() %>
+<title><%= page_title() %></title>
+
+<% if (has_config('open_graph')) { %>
+    <%- open_graph({
+        twitter_id: get_config('open_graph.twitter_id'),
+        twitter_site: get_config('open_graph.twitter_site'),
+        google_plus: get_config('open_graph.google_plus'),
+        fb_admins: get_config('open_graph.fb_admins'),
+        fb_app_id: get_config('open_graph.fb_app_id'),
+        image: get_og_image(page)
+    }) %>
+<% } %>
+
+<% if (has_config('canonical_url')) { %>
+<link rel="canonical" href="<%- get_config('canonical_url') %>" />
+<% } %>
+
+<% if (has_config('rss')) { %>
+<link rel="alternative" href="<%- get_config('rss') %>" title="<%= get_config('title') %>" type="application/atom+xml">
+<% } %>
+
+<% if (has_config('favicon')) { %>
+<link rel="icon" href="<%- url_for(get_config('favicon')) %>">
+<% } %>
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+<%- _css(cdn('bulma', '0.7.2', 'css/bulma.css')) %>
+<%- _css(iconcdn()) %>
+<%- _css(fontcdn('Ubuntu:400,600|Source+Code+Pro')) %>
+<%- _css(cdn('highlight.js', '9.12.0', 'styles/' + get_config('article.highlight.theme') + '.css')) %>
+
+<% if (has_config('plugins')) { %>
+    <% for (let plugin in get_config('plugins')) { %>
+    <%- _partial('plugin/' + plugin, { head: true, plugin: get_config('plugins')[plugin] }) %>
+    <% } %>
+<% } %>
+
+<%- _css('css/style') %>
