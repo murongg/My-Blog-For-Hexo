@@ -29,10 +29,11 @@ const headers = {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36"
 };
 ```
+<!--more-->
 ## 开始
 ### 首页分析
 ![目标站首页](https://s2.ax1x.com/2020/01/20/1P3439.png)
-<!--more-->
+
 #### 编写页码遍历代码
 在首页我们需要获取每一篇图集的完整URL地址，和首页列表的页码。
 
