@@ -174,8 +174,8 @@ widgets:
         position: left
         # Links to be shown in the links widget
         links:
-            Music Home For 163: 'https://hexo.io'
-            Music Home For QQ: 'https://github.com/ppoffice'
+            Music Home For 163: 'https://music.163.com/#/artist?id=12199466'
+            Music Home For QQ: 'https://y.qq.com/n/yqq/singer/003bnFYh42Dc2M.html'
             乐球网（音乐学习平台）: 'http://yueqiuyy.com/'
             
     -
