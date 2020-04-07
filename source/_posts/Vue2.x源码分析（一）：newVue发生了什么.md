@@ -1,5 +1,5 @@
 ---
-title: Vue源码分析：new Vue发生了什么（一）
+title: Vue2.x源码分析（一）：new Vue发生了什么
 date: 2020-03-31 18:31:45
 thumbnail: https://picsum.photos/id/23/565/242
 categories:
@@ -11,6 +11,8 @@ tags:
   - JavaScript
   - Vue源码分析
 ---
+
+[Vue源码分析 + 逐行注释 Github地址](https://github.com/MuRongXiaoDouBi/vue2.x-analysis-comment)
 
 ## new Vue()做了什么？
 
