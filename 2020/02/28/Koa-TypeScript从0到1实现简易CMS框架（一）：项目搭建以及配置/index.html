@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html  lang="zh">
+<head>
+    <!--
+ * @Author: MuRong
+ * @Date: 2020-02-27 18:55:43
+ * @LastEditors: MuRong
+ * @LastEditTime: 2020-02-27 19:14:51
+ * @Description: 
+ * @FilePath: \My-Blog-For-Hexo\themes\icarus\layout\common\head.ejs
+ -->
+<meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 4.2.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置 - MuRong&#39;Blog | 一位热爱音乐制作的web前端程序员</title>
+
+
+    <meta name="description" content="目录 Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置   Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理 Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口    项目地址：koa-typescript-cms  前言最近学习了慕课网七月老师的《从0到1手把手教你用Node.js+">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置">
+<meta property="og:url" content="https://www.imuboy.cn/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9A%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA%E4%BB%A5%E5%8F%8A%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="MuRong&#39;Blog | 一位热爱音乐制作的web前端程序员">
+<meta property="og:description" content="目录 Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置   Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理 Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口    项目地址：koa-typescript-cms  前言最近学习了慕课网七月老师的《从0到1手把手教你用Node.js+">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.picsum.photos/id/187/565/242.jpg">
+<meta property="article:published_time" content="2020-02-28T08:19:11.000Z">
+<meta property="article:modified_time" content="2020-07-08T06:52:46.905Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Koa">
+<meta property="article:tag" content="cms">
+<meta property="article:tag" content="后端">
+<meta property="article:tag" content="RESTFUL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.picsum.photos/id/187/565/242.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon.svg">
+
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="is-3-column">
+    <!--
+ * @Author: MuRong
+ * @Date: 2020-02-27 18:55:43
+ * @LastEditors: MuRong
+ * @LastEditTime: 2020-02-27 19:47:58
+ * @Description: 
+ * @FilePath: \My-Blog-For-Hexo\themes\hexo-icarus\layout\common\navbar.ejs
+ -->
+<nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <!-- <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo.svg" alt="Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置" height="28">
+            
+            </a> -->
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">Home</a>
+                
+                <a class="navbar-item"
+                href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81/">Music Works</a>
+                
+                <a class="navbar-item"
+                href="/categories">Categories</a>
+                
+                <a class="navbar-item"
+                href="/tags">Tags</a>
+                
+                <a class="navbar-item"
+                href="/about">About</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/MuRongXiaoDouBi">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+            <img class="thumbnail" src="https://i.picsum.photos/id/187/565/242.jpg" alt="Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2020-02-28T08:19:11.000Z">2020-02-28</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/">WEB后端</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/NodeJs/">NodeJs</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/NodeJs/TypeScript/">TypeScript</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    8 分钟 读完 (大约 1201 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置
+            
+        </h1>
+        <div class="content">
+            <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置/">Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置</a>  </li>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理/">Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理</a></li>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口/">Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口</a>  </li>
+</ul>
+<p>项目地址：<a href="https://github.com/MuRongXiaoDouBi/koa-typescript-cms">koa-typescript-cms</a> </p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近学习了慕课网七月老师的《从0到1手把手教你用Node.js+KOA2打造超好用的Web框架》，自己使用<strong>TypeScript</strong>重构了一个简单的<strong>cms框架</strong>，具有<strong>路由自动注册、全局异常处理、参数校验、JWT鉴权、权限管理</strong>等cms基础功能。</p>
+<h2 id="主要工具库"><a href="#主要工具库" class="headerlink" title="主要工具库"></a>主要工具库</h2><ul>
+<li><strong>koa</strong>   web框架</li>
+<li><strong>koa-bodyparser</strong> 处理koa post请求</li>
+<li><strong>koa-router</strong> koa路由</li>
+<li><strong>sequelize、sequelize-typescript、mysql2</strong> ORM框架与Mysql</li>
+<li><strong>validator、class-validator</strong> 参数校验</li>
+<li><strong>jsonwebtoken</strong> jwt</li>
+<li><strong>bcryptjs</strong> 加密工具</li>
+<li><strong>reflect-metadata</strong> 给装饰器添加各种信息</li>
+<li><strong>nodemon</strong> 监听文件改变自动重启服务</li>
+<li><strong>lodash</strong> 非常好用的工具函数库</li>
+</ul>
+<a id="more"></a>
+<h2 id="项目目录"><a href="#项目目录" class="headerlink" title="项目目录"></a>项目目录</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">├── dist                                        &#x2F;&#x2F; ts编译后的文件</span><br><span class="line">├── src                                         &#x2F;&#x2F; 源码目录</span><br><span class="line">│   ├── components                              &#x2F;&#x2F; 组件</span><br><span class="line">│   │   ├── app                                 &#x2F;&#x2F; 项目业务代码</span><br><span class="line">│   │   │   ├── api                             &#x2F;&#x2F; api层</span><br><span class="line">│   │   │   ├── service                         &#x2F;&#x2F; service层</span><br><span class="line">│   │   │   ├── model                           &#x2F;&#x2F; model层</span><br><span class="line">│   │   │   ├── validators                      &#x2F;&#x2F; 参数校验类</span><br><span class="line">│   │   │   ├── lib                             &#x2F;&#x2F; interface与enum</span><br><span class="line">│   │   ├── core                                &#x2F;&#x2F; 项目核心代码</span><br><span class="line">│   │   ├── middlewares                         &#x2F;&#x2F; 中间件</span><br><span class="line">│   │   ├── config                              &#x2F;&#x2F; 全局配置文件</span><br><span class="line">│   │   ├── app.ts                              &#x2F;&#x2F; 项目入口文件</span><br><span class="line">├── tests                                       &#x2F;&#x2F; 单元测试</span><br><span class="line">├── package.json                                &#x2F;&#x2F; package.json                                </span><br><span class="line">├── tsconfig.json                               &#x2F;&#x2F; ts配置文件</span><br></pre></td></tr></table></figure>
+
+<h2 id="项目初始化"><a href="#项目初始化" class="headerlink" title="项目初始化"></a>项目初始化</h2><h3 id="初始化package-json"><a href="#初始化package-json" class="headerlink" title="初始化package.json"></a>初始化package.json</h3><p>创建项目文件夹，再控制台中打开此文件夹，输入<code>npm init -y</code>初始化<code>package.json</code>文件。</p>
+<h3 id="初始化TypeScript配置文件"><a href="#初始化TypeScript配置文件" class="headerlink" title="初始化TypeScript配置文件"></a>初始化TypeScript配置文件</h3><p>根目录运行<code>tsc --init</code>后，自动创建<code>tsconfig.json</code>文件，完成后，执行<code>npm install typescript ts-node @types/node</code>命令  </p>
+<p><strong><code>tsconfig.json</code>文件源码：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">"compilerOptions"</span>: &#123;</span><br><span class="line">    <span class="string">"target"</span>: <span class="string">"ES2015"</span>,                          <span class="comment">/* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', 'ES2018', 'ES2019' or 'ESNEXT'. */</span></span><br><span class="line">    <span class="string">"module"</span>: <span class="string">"commonjs"</span>,                     <span class="comment">/* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */</span></span><br><span class="line">    <span class="string">"declaration"</span>: <span class="literal">true</span>,                   <span class="comment">/* Generates corresponding '.d.ts' file. */</span></span><br><span class="line">    <span class="string">"sourceMap"</span>: <span class="literal">true</span>,                     <span class="comment">/* Generates corresponding '.map' file. */</span></span><br><span class="line">    <span class="string">"outDir"</span>: <span class="string">"./dist"</span>,                        <span class="comment">/* Redirect output structure to the directory. */</span></span><br><span class="line">    <span class="string">"rootDir"</span>: <span class="string">"./src"</span>,                       <span class="comment">/* Specify the root directory of input files. Use to control the output directory structure with --outDir. */</span></span><br><span class="line">    <span class="string">"importHelpers"</span>: <span class="literal">true</span>,                 <span class="comment">/* Import emit helpers from 'tslib'. */</span></span><br><span class="line">    <span class="string">"strict"</span>: <span class="literal">true</span>,                           <span class="comment">/* Enable all strict type-checking options. */</span></span><br><span class="line">    <span class="string">"noImplicitAny"</span>: <span class="literal">false</span>,                 <span class="comment">/* Raise error on expressions and declarations with an implied 'any' type. */</span></span><br><span class="line">    <span class="string">"typeRoots"</span>: [<span class="string">"./node_modules/@types"</span>],                       <span class="comment">/* List of folders to include type definitions from. */</span></span><br><span class="line">    <span class="string">"esModuleInterop"</span>: <span class="literal">true</span>,                  <span class="comment">/* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */</span></span><br><span class="line">    <span class="string">"experimentalDecorators"</span>: <span class="literal">true</span>,        <span class="comment">/* Enables experimental support for ES7 decorators. */</span></span><br><span class="line">    <span class="string">"emitDecoratorMetadata"</span>: <span class="literal">true</span>,         <span class="comment">/* Enables experimental support for emitting type metadata for decorators. */</span></span><br><span class="line">    <span class="string">"forceConsistentCasingInFileNames"</span>: <span class="literal">true</span>  <span class="comment">/* Disallow inconsistently-cased references to the same file. */</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"exclude"</span>: [<span class="string">"node_modules"</span>],</span><br><span class="line">  <span class="string">"include"</span>: [<span class="string">"src"</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="初始化koa服务"><a href="#初始化koa服务" class="headerlink" title="初始化koa服务"></a>初始化koa服务</h2><p>执行<code>npm install koa @types/koa</code>命令<br>在根目录创建<code>src</code>文件夹，并在文件夹下创建<code>app.ts</code>文件  </p>
+<p><strong><code>app.ts</code>文件代码：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Koa <span class="keyword">from</span> <span class="string">'koa'</span>;</span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa()</span><br><span class="line"></span><br><span class="line">app.listen(<span class="number">3000</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'Server running on port 3000'</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="使用nodemon自动监听文件改变并重启服务"><a href="#使用nodemon自动监听文件改变并重启服务" class="headerlink" title="使用nodemon自动监听文件改变并重启服务"></a>使用nodemon自动监听文件改变并重启服务</h2><p>执行<code>npm install nodemon</code>命令<br>修改<code>package.json</code>文件中的<code>scripts</code>字段<br>添加<code>&quot;start&quot;: &quot;nodemon -e ts,tsx --exec ts-node ./src/app.ts&quot;</code><br>添加此命令后，<code>nodemon</code>会监听<code>src</code>目录下文件改变，自动重启</p>
+<p><strong>修改后：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"scripts"</span>: &#123;</span><br><span class="line">    <span class="string">"start"</span>: <span class="string">"nodemon -e ts,tsx --exec ts-node ./src/app.ts"</span>,</span><br><span class="line">    <span class="string">"test"</span>: <span class="string">"echo \"Error: no test specified\" &amp;&amp; exit 1"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="创建配置文件"><a href="#创建配置文件" class="headerlink" title="创建配置文件"></a>创建配置文件</h2><p>再<code>src</code>目录创建<code>config</code>文件夹，并创建<code>config.ts</code>文件</p>
+<h3 id="定义各类Interface"><a href="#定义各类Interface" class="headerlink" title="定义各类Interface"></a>定义各类Interface</h3><h4 id="config-interface"><a href="#config-interface" class="headerlink" title="config interface"></a>config interface</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> interface configInterface &#123;</span><br><span class="line">  environment?: string; <span class="comment">// 环境变量</span></span><br><span class="line">  database: databaseInterface; <span class="comment">// 数据库配置</span></span><br><span class="line">  security: securityInterface; <span class="comment">// token生成配置</span></span><br><span class="line">  wx: wxInterface; <span class="comment">// 微信小程序参数配置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="security-interface"><a href="#security-interface" class="headerlink" title="security interface"></a>security interface</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> interface securityInterface &#123;</span><br><span class="line">  secretKey?: string; <span class="comment">// jwt的secretKey</span></span><br><span class="line">  expiresIn?: number; <span class="comment">// jwt的失效时间</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="datebase-interface"><a href="#datebase-interface" class="headerlink" title="datebase interface"></a>datebase interface</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> interface databaseInterface &#123;</span><br><span class="line">  dbName: string; <span class="comment">// 数据库名称</span></span><br><span class="line">  host: string; <span class="comment">// 数据库地址</span></span><br><span class="line">  port: number; <span class="comment">// 数据库端口</span></span><br><span class="line">  user: string; <span class="comment">// 数据库用户名</span></span><br><span class="line">  password?: string; <span class="comment">// 数据库密码</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="wx-interface"><a href="#wx-interface" class="headerlink" title="wx interface"></a>wx interface</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> interface wxInterface &#123;</span><br><span class="line">  AppID?: string; <span class="comment">// AppID</span></span><br><span class="line">  AppSecret?: string; <span class="comment">// AppSecret</span></span><br><span class="line">  LoginUrl?: string <span class="comment">// 小程序登录请求地址</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>全部配置代码</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">export const config: configInterface &#x3D; &#123;</span><br><span class="line">  environment: &quot;dev&quot;,</span><br><span class="line">  database: &#123;</span><br><span class="line">    dbName: &quot;koacms&quot;,</span><br><span class="line">    host: &quot;localhost&quot;,</span><br><span class="line">    port: 3306,</span><br><span class="line">    user: &quot;root&quot;,</span><br><span class="line">    password: &quot;&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  security: &#123;</span><br><span class="line">    secretKey: &quot;5465asd6as5d4as65d46sd&quot;,</span><br><span class="line">    expiresIn: 60 * 60 * 24 * 30</span><br><span class="line">  &#125;,</span><br><span class="line">  wx: &#123;</span><br><span class="line">    AppID: &quot;你的AppID&quot;,</span><br><span class="line">    AppSecret: &quot;你的AppSecret&quot;,</span><br><span class="line">    LoginUrl: &#39;https:&#x2F;&#x2F;api.weixin.qq.com&#x2F;sns&#x2F;jscode2session?appid&#x3D;%s&amp;secret&#x3D;%s&amp;js_code&#x3D;%s&amp;grant_type&#x3D;authorization_code&#39;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><strong>下一篇：<a href="Koa-TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理">Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理</a></strong></p>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Koa/" rel="tag">Koa</a>, <a class="has-link-grey -link" href="/tags/RESTFUL/" rel="tag">RESTFUL</a>, <a class="has-link-grey -link" href="/tags/cms/" rel="tag">cms</a>, <a class="has-link-grey -link" href="/tags/%E5%90%8E%E7%AB%AF/" rel="tag">后端</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+        <div class="social-share"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css">
+<script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3>
+        <div class="buttons is-centered">
+            
+                
+<a class="button is-info donate">
+    <span class="icon is-small">
+        <i class="fab fa-alipay"></i>
+    </span>
+    <span>支付宝</span>
+    <div class="qrcode"><img src="/images/alipay.jpg" alt="支付宝"></div>
+</a>
+
+                
+                
+<a class="button is-success donate">
+    <span class="icon is-small">
+        <i class="fab fa-weixin"></i>
+    </span>
+    <span>微信</span>
+    <div class="qrcode"><img src="/images/wechatPay.jpg" alt="微信"></div>
+</a>
+
+                
+        </div>
+    </div>
+</div>
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E8%B7%AF%E7%94%B1%E8%87%AA%E5%8A%A8%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2020/02/27/JS%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E5%8E%9F%E5%9E%8B%E4%B8%8E%E5%8E%9F%E5%9E%8B%E9%93%BE/">
+                <span class="level-item">JS基础知识（二）：原型与原型链</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="valine-thread" class="content"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#valine-thread' ,
+        notify: true,
+        verify: true,
+        app_id: 'AGgzzAiyMMYQpiL9PA7Pb5cS-gzGzoHsz',
+        app_key: 'BlPRUwYfb5kCvacFDeDxGWJf',
+        placeholder: '来吐槽我吧！！！'
+    });
+</script>
+
+    </div>
+</div>
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left is-sticky">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="is-rounded" src="/images/avatar.png" alt="Mu Rong">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        Mu Rong
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        Web Developer &amp; Music Producer
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>Shandong,China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <a href="/archives">
+                        <p class="title has-text-weight-normal">
+                            22
+                        </p>
+                    </a>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <a href="/categories">
+                        <p class="title has-text-weight-normal">
+                            14
+                        </p>
+                    </a>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <a href="/tags">
+                        <p class="title has-text-weight-normal">
+                            29
+                        </p>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="Github" href="https://github.com/MuRongXiaoDouBi">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="QQ:372638156" href="/">
+                
+                <i class="fab fa-qq"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="WX:g520cong" href="https://twitter.com">
+                
+                <i class="fab fa-weixin"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="微博" href="https://weibo.com/u/3673968282">
+                
+                <i class="fab fa-weibo"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="telegram:MuRongXDB" href="/">
+                
+                <i class="fab fa-telegram"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            链接
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="https://music.163.com/#/artist?id=12199466" target="_blank" rel="noopener">
+                    <span class="level-left">
+                        <span class="level-item">Music Home For 163</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">music.163.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://y.qq.com/n/yqq/singer/003bnFYh42Dc2M.html" target="_blank" rel="noopener">
+                    <span class="level-left">
+                        <span class="level-item">Music Home For QQ</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">y.qq.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="http://yueqiuyy.com/" target="_blank" rel="noopener">
+                    <span class="level-left">
+                        <span class="level-item">乐球网（音乐学习平台）</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">yueqiuyy.com</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">
+            <span class="level-start">
+                <span class="level-item">程序世界</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">19</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">
+            <span class="level-start">
+                <span class="level-item">JavaScript</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">7</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/NodeJs/">
+            <span class="level-start">
+                <span class="level-item">NodeJs</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">
+            <span class="level-start">
+                <span class="level-item">WEB前端</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">6</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/">
+            <span class="level-start">
+                <span class="level-item">WEB后端</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">3</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/python/">
+            <span class="level-start">
+                <span class="level-item">python</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
+            <span class="level-start">
+                <span class="level-item">设计模式</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/">
+            <span class="level-start">
+                <span class="level-item">音乐世界</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">3</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81/">
+            <span class="level-start">
+                <span class="level-item">音乐作品</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E6%9D%82%E8%B0%88/">
+            <span class="level-start">
+                <span class="level-item">音乐杂谈</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/4536251/" style="font-size: 10px;">4536251</a> <a href="/tags/Ajax/" style="font-size: 10px;">Ajax</a> <a href="/tags/BOM/" style="font-size: 10px;">BOM</a> <a href="/tags/DOM/" style="font-size: 10px;">DOM</a> <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/JavaScript%E5%9F%BA%E7%A1%80/" style="font-size: 16px;">JavaScript基础</a> <a href="/tags/Jazz/" style="font-size: 10px;">Jazz</a> <a href="/tags/Koa/" style="font-size: 14px;">Koa</a> <a href="/tags/Nuxt/" style="font-size: 10px;">Nuxt</a> <a href="/tags/R-B/" style="font-size: 10px;">R&B</a> <a href="/tags/RESTFUL/" style="font-size: 14px;">RESTFUL</a> <a href="/tags/Vue/" style="font-size: 18px;">Vue</a> <a href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" style="font-size: 12px;">Vue源码分析</a> <a href="/tags/Web-Api/" style="font-size: 14px;">Web Api</a> <a href="/tags/cms/" style="font-size: 14px;">cms</a> <a href="/tags/this/" style="font-size: 10px;">this</a> <a href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/" style="font-size: 10px;">万能和声进行</a> <a href="/tags/%E4%BA%8B%E4%BB%B6/" style="font-size: 10px;">事件</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/" style="font-size: 10px;">事件代理</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/" style="font-size: 10px;">事件冒泡</a> <a href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/" style="font-size: 10px;">作用域</a> <a href="/tags/%E5%8E%9F%E5%9E%8B/" style="font-size: 10px;">原型</a> <a href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/" style="font-size: 10px;">原型链</a> <a href="/tags/%E5%8F%98%E9%87%8F/" style="font-size: 10px;">变量</a> <a href="/tags/%E5%90%8E%E7%AB%AF/" style="font-size: 14px;">后端</a> <a href="/tags/%E5%BA%93/" style="font-size: 10px;">库</a> <a href="/tags/%E5%BC%82%E6%AD%A5/" style="font-size: 10px;">异步</a> <a href="/tags/%E7%88%AC%E8%99%AB/" style="font-size: 12px;">爬虫</a> <a href="/tags/%E9%97%AD%E5%8C%85/" style="font-size: 10px;">闭包</a>
+    </div>
+</div>
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen is-sticky">
+        
+            <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/28/565/242" alt="Vue2.x源码分析（二）：Vue实例挂载的实现">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-07T20:30:23.000Z">2020-04-07</time></div>
+                    <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（二）：Vue实例挂载的实现</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/406/565/242.jpg" alt="mr-progress-vue文档">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-05T18:18:10.000Z">2020-04-05</time></div>
+                    <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="title has-link-black-ter is-size-6 has-text-weight-normal">mr-progress-vue文档</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/23/565/242" alt="Vue2.x源码分析（一）：new Vue发生了什么">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-31T18:31:45.000Z">2020-03-31</time></div>
+                    <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（一）：new Vue发生了什么</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/112/565/242.jpg" alt="JS-Web-API（三）：Ajax">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:02:45.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（三）：Ajax</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/115/565/242.jpg" alt="JS-Web-API（二）：事件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:01:05.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（二）：事件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/03/">
+                <span class="level-start">
+                    <span class="level-item">三月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">9</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/4536251/">
+                        <span class="tag">4536251</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Ajax/">
+                        <span class="tag">Ajax</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/BOM/">
+                        <span class="tag">BOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/DOM/">
+                        <span class="tag">DOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript/">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript%E5%9F%BA%E7%A1%80/">
+                        <span class="tag">JavaScript基础</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Jazz/">
+                        <span class="tag">Jazz</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Koa/">
+                        <span class="tag">Koa</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Nuxt/">
+                        <span class="tag">Nuxt</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/R-B/">
+                        <span class="tag">R&amp;B</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RESTFUL/">
+                        <span class="tag">RESTFUL</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue/">
+                        <span class="tag">Vue</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+                        <span class="tag">Vue源码分析</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Web-Api/">
+                        <span class="tag">Web Api</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/cms/">
+                        <span class="tag">cms</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/this/">
+                        <span class="tag">this</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/">
+                        <span class="tag">万能和声进行</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6/">
+                        <span class="tag">事件</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/">
+                        <span class="tag">事件代理</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/">
+                        <span class="tag">事件冒泡</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/">
+                        <span class="tag">作用域</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B/">
+                        <span class="tag">原型</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/">
+                        <span class="tag">原型链</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8F%98%E9%87%8F/">
+                        <span class="tag">变量</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%90%8E%E7%AB%AF/">
+                        <span class="tag">后端</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BA%93/">
+                        <span class="tag">库</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BC%82%E6%AD%A5/">
+                        <span class="tag">异步</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E7%88%AC%E8%99%AB/">
+                        <span class="tag">爬虫</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E9%97%AD%E5%8C%85/">
+                        <span class="tag">闭包</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right is-sticky">
+    
+        <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/28/565/242" alt="Vue2.x源码分析（二）：Vue实例挂载的实现">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-07T20:30:23.000Z">2020-04-07</time></div>
+                    <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（二）：Vue实例挂载的实现</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/406/565/242.jpg" alt="mr-progress-vue文档">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-05T18:18:10.000Z">2020-04-05</time></div>
+                    <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="title has-link-black-ter is-size-6 has-text-weight-normal">mr-progress-vue文档</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/23/565/242" alt="Vue2.x源码分析（一）：new Vue发生了什么">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-31T18:31:45.000Z">2020-03-31</time></div>
+                    <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（一）：new Vue发生了什么</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/112/565/242.jpg" alt="JS-Web-API（三）：Ajax">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:02:45.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（三）：Ajax</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/115/565/242.jpg" alt="JS-Web-API（二）：事件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:01:05.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（二）：事件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/03/">
+                <span class="level-start">
+                    <span class="level-item">三月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">9</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/4536251/">
+                        <span class="tag">4536251</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Ajax/">
+                        <span class="tag">Ajax</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/BOM/">
+                        <span class="tag">BOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/DOM/">
+                        <span class="tag">DOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript/">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript%E5%9F%BA%E7%A1%80/">
+                        <span class="tag">JavaScript基础</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Jazz/">
+                        <span class="tag">Jazz</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Koa/">
+                        <span class="tag">Koa</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Nuxt/">
+                        <span class="tag">Nuxt</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/R-B/">
+                        <span class="tag">R&amp;B</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RESTFUL/">
+                        <span class="tag">RESTFUL</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue/">
+                        <span class="tag">Vue</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+                        <span class="tag">Vue源码分析</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Web-Api/">
+                        <span class="tag">Web Api</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/cms/">
+                        <span class="tag">cms</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/this/">
+                        <span class="tag">this</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/">
+                        <span class="tag">万能和声进行</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6/">
+                        <span class="tag">事件</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/">
+                        <span class="tag">事件代理</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/">
+                        <span class="tag">事件冒泡</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/">
+                        <span class="tag">作用域</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B/">
+                        <span class="tag">原型</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/">
+                        <span class="tag">原型链</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8F%98%E9%87%8F/">
+                        <span class="tag">变量</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%90%8E%E7%AB%AF/">
+                        <span class="tag">后端</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BA%93/">
+                        <span class="tag">库</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BC%82%E6%AD%A5/">
+                        <span class="tag">异步</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E7%88%AC%E8%99%AB/">
+                        <span class="tag">爬虫</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E9%97%AD%E5%8C%85/">
+                        <span class="tag">闭包</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo.svg" alt="Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2020 John Doe&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+
+<script>
+var IcarusThemeSettings = {
+    site: {
+        url: 'https://www.imuboy.cn',
+        external_link: {"enable":true,"exclude":[]}
+    },
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+
+
+<script src="/js/animation.js"></script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>

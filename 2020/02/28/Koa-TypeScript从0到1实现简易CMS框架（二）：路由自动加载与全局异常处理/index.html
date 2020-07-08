@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html  lang="zh">
+<head>
+    <!--
+ * @Author: MuRong
+ * @Date: 2020-02-27 18:55:43
+ * @LastEditors: MuRong
+ * @LastEditTime: 2020-02-27 19:14:51
+ * @Description: 
+ * @FilePath: \My-Blog-For-Hexo\themes\icarus\layout\common\head.ejs
+ -->
+<meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 4.2.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理 - MuRong&#39;Blog | 一位热爱音乐制作的web前端程序员</title>
+
+
+    <meta name="description" content="目录 Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置   Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理 Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口    项目地址：koa-typescript-cms  前言koa本身是没有路由的，需借助第三方库koa-router实现路">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理">
+<meta property="og:url" content="https://www.imuboy.cn/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E8%B7%AF%E7%94%B1%E8%87%AA%E5%8A%A8%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="MuRong&#39;Blog | 一位热爱音乐制作的web前端程序员">
+<meta property="og:description" content="目录 Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置   Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理 Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口    项目地址：koa-typescript-cms  前言koa本身是没有路由的，需借助第三方库koa-router实现路">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.picsum.photos/id/178/565/242.jpg">
+<meta property="article:published_time" content="2020-02-28T08:25:27.000Z">
+<meta property="article:modified_time" content="2020-07-08T06:52:46.905Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Koa">
+<meta property="article:tag" content="cms">
+<meta property="article:tag" content="后端">
+<meta property="article:tag" content="RESTFUL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.picsum.photos/id/178/565/242.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon.svg">
+
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="is-3-column">
+    <!--
+ * @Author: MuRong
+ * @Date: 2020-02-27 18:55:43
+ * @LastEditors: MuRong
+ * @LastEditTime: 2020-02-27 19:47:58
+ * @Description: 
+ * @FilePath: \My-Blog-For-Hexo\themes\hexo-icarus\layout\common\navbar.ejs
+ -->
+<nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <!-- <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo.svg" alt="Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理" height="28">
+            
+            </a> -->
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">Home</a>
+                
+                <a class="navbar-item"
+                href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81/">Music Works</a>
+                
+                <a class="navbar-item"
+                href="/categories">Categories</a>
+                
+                <a class="navbar-item"
+                href="/tags">Tags</a>
+                
+                <a class="navbar-item"
+                href="/about">About</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/MuRongXiaoDouBi">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+            <img class="thumbnail" src="https://i.picsum.photos/id/178/565/242.jpg" alt="Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2020-02-28T08:25:27.000Z">2020-02-28</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/">WEB后端</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/NodeJs/">NodeJs</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/NodeJs/TypeScript/">TypeScript</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    13 分钟 读完 (大约 1990 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理
+            
+        </h1>
+        <div class="content">
+            <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置/">Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置</a>  </li>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理/">Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理</a></li>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口/">Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口</a>  </li>
+</ul>
+<p>项目地址：<a href="https://github.com/MuRongXiaoDouBi/koa-typescript-cms">koa-typescript-cms</a> </p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>koa</code>本身是没有路由的，需借助第三方库<code>koa-router</code>实现路由功能，但是路由的拆分，导致<code>app.ts</code>里需要引入许多路由文件，为了方便，我们可以做一个简单的路由自动加载功能来简化我们的代码量；全局异常处理是每个cms框架中比不可少的部分，我们可以通过<code>koa</code>的中间件机制来实现此功能。</p>
+<h2 id="主要工具库"><a href="#主要工具库" class="headerlink" title="主要工具库"></a>主要工具库</h2><ul>
+<li><strong>koa</strong>   web框架</li>
+<li><strong>koa-bodyparser</strong> 处理koa post请求</li>
+<li><strong>koa-router</strong> koa路由</li>
+<li><strong>sequelize、sequelize-typescript、mysql2</strong> ORM框架与Mysql</li>
+<li><strong>validator、class-validator</strong> 参数校验</li>
+<li><strong>jsonwebtoken</strong> jwt</li>
+<li><strong>bcryptjs</strong> 加密工具</li>
+<li><strong>reflect-metadata</strong> 给装饰器添加各种信息</li>
+<li><strong>nodemon</strong> 监听文件改变自动重启服务</li>
+<li><strong>lodash</strong> 非常好用的工具函数库</li>
+</ul>
+<a id="more"></a>
+<h2 id="项目目录"><a href="#项目目录" class="headerlink" title="项目目录"></a>项目目录</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">├── dist                                        &#x2F;&#x2F; ts编译后的文件</span><br><span class="line">├── src                                         &#x2F;&#x2F; 源码目录</span><br><span class="line">│   ├── components                              &#x2F;&#x2F; 组件</span><br><span class="line">│   │   ├── app                                 &#x2F;&#x2F; 项目业务代码</span><br><span class="line">│   │   │   ├── api                             &#x2F;&#x2F; api层</span><br><span class="line">│   │   │   ├── service                         &#x2F;&#x2F; service层</span><br><span class="line">│   │   │   ├── model                           &#x2F;&#x2F; model层</span><br><span class="line">│   │   │   ├── validators                      &#x2F;&#x2F; 参数校验类</span><br><span class="line">│   │   │   ├── lib                             &#x2F;&#x2F; interface与enum</span><br><span class="line">│   │   ├── core                                &#x2F;&#x2F; 项目核心代码</span><br><span class="line">│   │   ├── middlewares                         &#x2F;&#x2F; 中间件</span><br><span class="line">│   │   ├── config                              &#x2F;&#x2F; 全局配置文件</span><br><span class="line">│   │   ├── app.ts                              &#x2F;&#x2F; 项目入口文件</span><br><span class="line">├── tests                                       &#x2F;&#x2F; 单元测试</span><br><span class="line">├── package.json                                &#x2F;&#x2F; package.json                                </span><br><span class="line">├── tsconfig.json                               &#x2F;&#x2F; ts配置文件</span><br></pre></td></tr></table></figure>
+<h2 id="路由自动加载"><a href="#路由自动加载" class="headerlink" title="路由自动加载"></a>路由自动加载</h2><p>思路:（此功能借鉴lin-cms开源的lin-cms-koa-core）</p>
+<ol>
+<li>获取<code>api</code>文件夹下的所有文件</li>
+<li>判断文件的后缀名是否为<code>.ts</code>，如果是，使用<code>CommonJS</code>规范加载文件</li>
+<li>判断文件导出的内容是否为<code>Router</code>类型，如果是，则加载路由</li>
+</ol>
+<p>由于我们需要很多功能到要在服务执行后就加载，所以创建一个专门加载功能的类<code>InitManager</code>。<br>再<code>InitManager</code>类中创建类方法<code>initLoadRouters</code>，此方法专门作为加载路由的功能模块。<br>先创建一个辅助函数<code>getFiles</code>，此函数利用<code>node</code>的<code>fs</code>文件功能模块，来获取某文件夹下后的所有文件名，并返回一个字符串数组：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 获取文件夹下所有文件名</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@export</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;string&#125;</span> <span class="variable">dir</span></span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">export function getFiles(dir: string): string[] &#123;</span><br><span class="line">  <span class="keyword">let</span> res: string[] = [];</span><br><span class="line">  <span class="keyword">const</span> files = fs.readdirSync(dir);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> file <span class="keyword">of</span> files) &#123;</span><br><span class="line">    <span class="keyword">const</span> name = dir + <span class="string">"/"</span> + file;</span><br><span class="line">    <span class="keyword">if</span> (fs.statSync(name).isDirectory()) &#123;</span><br><span class="line">      <span class="keyword">const</span> tmp = getFiles(name);</span><br><span class="line">      res = res.concat(tmp);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      res.push(name);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来编写路由自动加载功能：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 路由自动加载</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@static</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@memberof <span class="variable">InitManager</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> initLoadRouters() &#123;</span><br><span class="line">  <span class="keyword">const</span> mainRouter = <span class="keyword">new</span> Router();</span><br><span class="line">  <span class="keyword">const</span> path: string = <span class="string">`<span class="subst">$&#123;process.cwd()&#125;</span>/src/app/api`</span>;</span><br><span class="line">  <span class="keyword">const</span> files: string[] = getFiles(path);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> file <span class="keyword">of</span> files) &#123;</span><br><span class="line">    <span class="comment">// 获取文件后缀名</span></span><br><span class="line">    <span class="keyword">const</span> extention: string = file.substring(</span><br><span class="line">      file.lastIndexOf(<span class="string">"."</span>),</span><br><span class="line">      file.length</span><br><span class="line">    );</span><br><span class="line">    <span class="keyword">if</span> (extention === <span class="string">".ts"</span>) &#123;</span><br><span class="line">      <span class="comment">// 加载api文件夹下所有文件</span></span><br><span class="line">      <span class="comment">// 并检测文件是否是koa的路由</span></span><br><span class="line">      <span class="comment">// 如果是路由便将路由加载</span></span><br><span class="line">      <span class="keyword">const</span> mod: Router = <span class="built_in">require</span>(file);</span><br><span class="line">      <span class="keyword">if</span> (mod <span class="keyword">instanceof</span> Router) &#123;</span><br><span class="line">        <span class="comment">// consola.info(`loading a router instance from file: $&#123;file&#125;`);</span></span><br><span class="line">        <span class="keyword">get</span>(mod, "stack", []).forEach((ly: Router.Layer) =&gt; &#123;</span><br><span class="line">          consola.info(<span class="string">`loading a route: <span class="subst">$&#123;get(ly, <span class="string">"path"</span>)&#125;</span>`</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">        mainRouter.use(mod.routes()).use(mod.allowedMethods());</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>InitManager</code>中创建另一个类方法<code>initCore</code>，此方法需传入一个<code>koa</code>实例，统一加载<code>InitManager</code>类中的其他功能模块。  </p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 入口方法</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@static</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;Koa&#125;</span> <span class="variable">app</span></span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@memberof <span class="variable">InitManager</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> initCore(app: Koa) &#123;</span><br><span class="line">  InitManager.app = app;</span><br><span class="line">  InitManager.initLoadRouters();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>需要注意的是，路由文件导出的时候不能再以<code>ES</code>的规范导出了，必须以<code>CommonJS</code>的规范进行导出。  </p>
+</blockquote>
+<p>例<code>api/v1/book.ts</code>文件源码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Router <span class="keyword">from</span> <span class="string">'koa-router'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router: Router = <span class="keyword">new</span> Router();</span><br><span class="line">router.prefix(<span class="string">'/v1/book'</span>)</span><br><span class="line">router.get(<span class="string">'/'</span>, <span class="keyword">async</span> (ctx) =&gt; &#123;</span><br><span class="line">    ctx.body = <span class="string">'Hello Book'</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注意这里</span></span><br><span class="line"><span class="built_in">module</span>.exports = router</span><br></pre></td></tr></table></figure>
+<p>最后在<code>app.ts</code>中加载，代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> InitManager <span class="keyword">from</span> <span class="string">'./core/init'</span></span><br><span class="line"></span><br><span class="line">InitManager.initCore(app)</span><br></pre></td></tr></table></figure>
+<p>此为还需要全局加载配置文件，与加载路由大同小异，代码一并附上  </p>
+<p><code>app/core/init.ts</code>全部代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Koa <span class="keyword">from</span> <span class="string">"koa"</span>;</span><br><span class="line"><span class="keyword">import</span> Router <span class="keyword">from</span> <span class="string">"koa-router"</span>;</span><br><span class="line"><span class="keyword">import</span> consola <span class="keyword">from</span> <span class="string">"consola"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="keyword">get</span> &#125; from "lodash";</span><br><span class="line">[</span><br><span class="line">import &#123; getFiles &#125; <span class="keyword">from</span> <span class="string">"./utils"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; config, configInterface &#125; <span class="keyword">from</span> <span class="string">"../config/config"</span>;</span><br><span class="line">declare global &#123;</span><br><span class="line">  namespace NodeJS &#123;</span><br><span class="line">    interface Global &#123;</span><br><span class="line">      config?: configInterface;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InitManager</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> app: Koa&lt;Koa.DefaultState, Koa.DefaultContext&gt;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 入口方法</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * <span class="doctag">@static</span></span></span><br><span class="line"><span class="comment">   * <span class="doctag">@param <span class="type">&#123;Koa&#125;</span> <span class="variable">app</span></span></span></span><br><span class="line"><span class="comment">   * <span class="doctag">@memberof <span class="variable">InitManager</span></span></span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">static</span> initCore(app: Koa) &#123;</span><br><span class="line">    InitManager.app = app;</span><br><span class="line">    InitManager.initLoadRouters();</span><br><span class="line">    InitManager.loadConfig();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 路由自动加载</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * <span class="doctag">@static</span></span></span><br><span class="line"><span class="comment">   * <span class="doctag">@memberof <span class="variable">InitManager</span></span></span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">static</span> initLoadRouters() &#123;</span><br><span class="line">    <span class="keyword">const</span> mainRouter = <span class="keyword">new</span> Router();</span><br><span class="line">    <span class="keyword">const</span> path: string = <span class="string">`<span class="subst">$&#123;process.cwd()&#125;</span>/src/app/api`</span>;</span><br><span class="line">    <span class="keyword">const</span> files: string[] = getFiles(path);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> file <span class="keyword">of</span> files) &#123;</span><br><span class="line">      <span class="comment">// 获取文件后缀名</span></span><br><span class="line">      <span class="keyword">const</span> extention: string = file.substring(</span><br><span class="line">        file.lastIndexOf(<span class="string">"."</span>),</span><br><span class="line">        file.length</span><br><span class="line">      );</span><br><span class="line">      <span class="keyword">if</span> (extention === <span class="string">".ts"</span>) &#123;</span><br><span class="line">        <span class="comment">// 加载api文件夹下所有文件</span></span><br><span class="line">        <span class="comment">// 并检测文件是否是koa的路由</span></span><br><span class="line">        <span class="comment">// 如果是路由便将路由加载</span></span><br><span class="line">        <span class="keyword">const</span> mod: Router = <span class="built_in">require</span>(file);</span><br><span class="line">        <span class="keyword">if</span> (mod <span class="keyword">instanceof</span> Router) &#123;</span><br><span class="line">          <span class="comment">// consola.info(`loading](https://note.youdao.com/) a router instance from file: $&#123;file&#125;`);</span></span><br><span class="line">          <span class="keyword">get</span>(mod, "stack", []).forEach((ly: Router.Layer) =&gt; &#123;</span><br><span class="line">            consola.info(<span class="string">`loading a route: <span class="subst">$&#123;get(ly, <span class="string">"path"</span>)&#125;</span>`</span>);</span><br><span class="line">          &#125;);</span><br><span class="line">          mainRouter.use(mod.routes()).use(mod.allowedMethods());</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 载入配置文件</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * <span class="doctag">@static</span></span></span><br><span class="line"><span class="comment">   * <span class="doctag">@memberof <span class="variable">InitManager</span></span></span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">static</span> loadConfig() &#123;</span><br><span class="line">    global.config = config;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> InitManager;</span><br></pre></td></tr></table></figure>
+<h2 id="全局异常处理"><a href="#全局异常处理" class="headerlink" title="全局异常处理"></a>全局异常处理</h2><p>此功能需依赖<code>koa</code>的中间件机制进行开发<br>异常分为已知异常与未知异常，需针对其进行不同处理</p>
+<p>常见的已知异常：路由参数错误、从数据库查询查询到空数据……<br>常见的未知错误：不正确的代码导致的依赖库报错……</p>
+<p>已知异常我们需要向用户抛出，以<code>json</code>的格式返回到客户端。<br>而未知异常一般只有在开发环境才会让它抛出，并且只有开发人员可以看到。</p>
+<p>已知异常向用户抛出时，需携带错误信息、错误代码、请求路径等信息。<br>我们需要针对已知异常封装一个类，用来标识错误为已知异常。<br>在<code>app/core</code>目录下创建文件<code>exception.ts</code>，此文件里有一个基类<code>HttpException</code>，此类继承<code>JavaScript</code>的内置对象<code>Error</code>，之后所有的已知异常类都将继承<code>HttpException</code>。<br>代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * HttpException 类构造函数的参数接口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> interface Exception &#123;</span><br><span class="line">  code?: number;</span><br><span class="line">  msg?: any;</span><br><span class="line">  errorCode?: number;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpException</span> <span class="keyword">extends</span> <span class="title">Error</span> </span>&#123;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * http 状态码</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  public code: number = <span class="number">500</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 返回的信息内容</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  public msg: any = <span class="string">"服务器未知错误"</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 特定的错误码</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  public errorCode: number = <span class="number">999</span>;</span><br><span class="line"></span><br><span class="line">  public fields: string[] = [<span class="string">"msg"</span>, <span class="string">"errorCode"</span>];</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 构造函数</span></span><br><span class="line"><span class="comment">   * <span class="doctag">@param </span>ex 可选参数，通过&#123;&#125;的形式传入</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">constructor</span>(ex?: Exception) &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line">    <span class="keyword">if</span> (ex &amp;&amp; ex.code) &#123;</span><br><span class="line">      assert(isInteger(ex.code));</span><br><span class="line">      <span class="keyword">this</span>.code = ex.code;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (ex &amp;&amp; ex.msg) &#123;</span><br><span class="line">      <span class="keyword">this</span>.msg = ex.msg;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (ex &amp;&amp; ex.errorCode) &#123;</span><br><span class="line">      assert(isInteger(ex.errorCode));</span><br><span class="line">      <span class="keyword">this</span>.errorCode = ex.errorCode;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>针对以上的情况进行编码<code>app/middlewares/exception.ts</code>全部代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; BaseContext, Next &#125; <span class="keyword">from</span> <span class="string">"koa"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; HttpException, Exception &#125; <span class="keyword">from</span> <span class="string">"../core/exception"</span>;</span><br><span class="line">interface CatchError extends Exception &#123;</span><br><span class="line">  request?: string;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> catchError = <span class="keyword">async</span> (ctx: BaseContext, <span class="attr">next</span>: Next) =&gt; &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">await</span> next();</span><br><span class="line">  &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">    <span class="keyword">const</span> isHttpException = error <span class="keyword">instanceof</span> HttpException</span><br><span class="line">    <span class="keyword">const</span> isDev = global.config?.environment === <span class="string">"dev"</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (isDev &amp;&amp; !isHttpException) &#123;</span><br><span class="line">      <span class="keyword">throw</span> error;  </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (isHttpException) &#123;</span><br><span class="line">      <span class="keyword">const</span> errorObj: CatchError = &#123;</span><br><span class="line">        msg: error.msg,</span><br><span class="line">        errorCode: error.errorCode,</span><br><span class="line">        request: <span class="string">`<span class="subst">$&#123;ctx.method&#125;</span> <span class="subst">$&#123;ctx.path&#125;</span>`</span></span><br><span class="line">      &#125;;</span><br><span class="line">      ctx.body = errorObj;</span><br><span class="line">      ctx.status = error.code;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> errorOjb: CatchError = &#123;</span><br><span class="line">        msg: <span class="string">"出现异常"</span>,</span><br><span class="line">        errorCode: <span class="number">999</span>,</span><br><span class="line">        request: <span class="string">`<span class="subst">$&#123;ctx.method&#125;</span> <span class="subst">$&#123;ctx.path&#125;</span>`</span></span><br><span class="line">      &#125;;</span><br><span class="line">      ctx.body = errorOjb;</span><br><span class="line">      ctx.status = <span class="number">500</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> catchError;</span><br></pre></td></tr></table></figure>
+<p>最后，<code>app.ts</code>里使用中间件，<code>app.ts</code>代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Koa <span class="keyword">from</span> <span class="string">'koa'</span>;</span><br><span class="line"><span class="keyword">import</span> InitManager <span class="keyword">from</span> <span class="string">'./core/init'</span></span><br><span class="line"><span class="keyword">import</span> catchError <span class="keyword">from</span> <span class="string">'./middlewares/exception'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa()</span><br><span class="line">app.use(catchError)</span><br><span class="line">InitManager.initCore(app)</span><br><span class="line"></span><br><span class="line">app.listen(<span class="number">3001</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'Server running on port 3001'</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>下一篇：<a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口/">Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口</a></strong></p>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Koa/" rel="tag">Koa</a>, <a class="has-link-grey -link" href="/tags/RESTFUL/" rel="tag">RESTFUL</a>, <a class="has-link-grey -link" href="/tags/cms/" rel="tag">cms</a>, <a class="has-link-grey -link" href="/tags/%E5%90%8E%E7%AB%AF/" rel="tag">后端</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+        <div class="social-share"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css">
+<script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3>
+        <div class="buttons is-centered">
+            
+                
+<a class="button is-info donate">
+    <span class="icon is-small">
+        <i class="fab fa-alipay"></i>
+    </span>
+    <span>支付宝</span>
+    <div class="qrcode"><img src="/images/alipay.jpg" alt="支付宝"></div>
+</a>
+
+                
+                
+<a class="button is-success donate">
+    <span class="icon is-small">
+        <i class="fab fa-weixin"></i>
+    </span>
+    <span>微信</span>
+    <div class="qrcode"><img src="/images/wechatPay.jpg" alt="微信"></div>
+</a>
+
+                
+        </div>
+    </div>
+</div>
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9A%E7%94%A8%E6%88%B7%E6%A8%A1%E5%9E%8B%E3%80%81%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C%E4%B8%8E%E7%94%A8%E6%88%B7%E6%B3%A8%E5%86%8C%E6%8E%A5%E5%8F%A3/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9A%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA%E4%BB%A5%E5%8F%8A%E9%85%8D%E7%BD%AE/">
+                <span class="level-item">Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="valine-thread" class="content"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#valine-thread' ,
+        notify: true,
+        verify: true,
+        app_id: 'AGgzzAiyMMYQpiL9PA7Pb5cS-gzGzoHsz',
+        app_key: 'BlPRUwYfb5kCvacFDeDxGWJf',
+        placeholder: '来吐槽我吧！！！'
+    });
+</script>
+
+    </div>
+</div>
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left is-sticky">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="is-rounded" src="/images/avatar.png" alt="Mu Rong">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        Mu Rong
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        Web Developer &amp; Music Producer
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>Shandong,China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <a href="/archives">
+                        <p class="title has-text-weight-normal">
+                            22
+                        </p>
+                    </a>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <a href="/categories">
+                        <p class="title has-text-weight-normal">
+                            14
+                        </p>
+                    </a>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <a href="/tags">
+                        <p class="title has-text-weight-normal">
+                            29
+                        </p>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="Github" href="https://github.com/MuRongXiaoDouBi">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="QQ:372638156" href="/">
+                
+                <i class="fab fa-qq"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="WX:g520cong" href="https://twitter.com">
+                
+                <i class="fab fa-weixin"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="微博" href="https://weibo.com/u/3673968282">
+                
+                <i class="fab fa-weibo"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="telegram:MuRongXDB" href="/">
+                
+                <i class="fab fa-telegram"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            链接
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="https://music.163.com/#/artist?id=12199466" target="_blank" rel="noopener">
+                    <span class="level-left">
+                        <span class="level-item">Music Home For 163</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">music.163.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://y.qq.com/n/yqq/singer/003bnFYh42Dc2M.html" target="_blank" rel="noopener">
+                    <span class="level-left">
+                        <span class="level-item">Music Home For QQ</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">y.qq.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="http://yueqiuyy.com/" target="_blank" rel="noopener">
+                    <span class="level-left">
+                        <span class="level-item">乐球网（音乐学习平台）</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">yueqiuyy.com</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">
+            <span class="level-start">
+                <span class="level-item">程序世界</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">19</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">
+            <span class="level-start">
+                <span class="level-item">JavaScript</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">7</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/NodeJs/">
+            <span class="level-start">
+                <span class="level-item">NodeJs</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">
+            <span class="level-start">
+                <span class="level-item">WEB前端</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">6</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/">
+            <span class="level-start">
+                <span class="level-item">WEB后端</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">3</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/python/">
+            <span class="level-start">
+                <span class="level-item">python</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
+            <span class="level-start">
+                <span class="level-item">设计模式</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/">
+            <span class="level-start">
+                <span class="level-item">音乐世界</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">3</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81/">
+            <span class="level-start">
+                <span class="level-item">音乐作品</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E6%9D%82%E8%B0%88/">
+            <span class="level-start">
+                <span class="level-item">音乐杂谈</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/4536251/" style="font-size: 10px;">4536251</a> <a href="/tags/Ajax/" style="font-size: 10px;">Ajax</a> <a href="/tags/BOM/" style="font-size: 10px;">BOM</a> <a href="/tags/DOM/" style="font-size: 10px;">DOM</a> <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/JavaScript%E5%9F%BA%E7%A1%80/" style="font-size: 16px;">JavaScript基础</a> <a href="/tags/Jazz/" style="font-size: 10px;">Jazz</a> <a href="/tags/Koa/" style="font-size: 14px;">Koa</a> <a href="/tags/Nuxt/" style="font-size: 10px;">Nuxt</a> <a href="/tags/R-B/" style="font-size: 10px;">R&B</a> <a href="/tags/RESTFUL/" style="font-size: 14px;">RESTFUL</a> <a href="/tags/Vue/" style="font-size: 18px;">Vue</a> <a href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" style="font-size: 12px;">Vue源码分析</a> <a href="/tags/Web-Api/" style="font-size: 14px;">Web Api</a> <a href="/tags/cms/" style="font-size: 14px;">cms</a> <a href="/tags/this/" style="font-size: 10px;">this</a> <a href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/" style="font-size: 10px;">万能和声进行</a> <a href="/tags/%E4%BA%8B%E4%BB%B6/" style="font-size: 10px;">事件</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/" style="font-size: 10px;">事件代理</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/" style="font-size: 10px;">事件冒泡</a> <a href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/" style="font-size: 10px;">作用域</a> <a href="/tags/%E5%8E%9F%E5%9E%8B/" style="font-size: 10px;">原型</a> <a href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/" style="font-size: 10px;">原型链</a> <a href="/tags/%E5%8F%98%E9%87%8F/" style="font-size: 10px;">变量</a> <a href="/tags/%E5%90%8E%E7%AB%AF/" style="font-size: 14px;">后端</a> <a href="/tags/%E5%BA%93/" style="font-size: 10px;">库</a> <a href="/tags/%E5%BC%82%E6%AD%A5/" style="font-size: 10px;">异步</a> <a href="/tags/%E7%88%AC%E8%99%AB/" style="font-size: 12px;">爬虫</a> <a href="/tags/%E9%97%AD%E5%8C%85/" style="font-size: 10px;">闭包</a>
+    </div>
+</div>
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen is-sticky">
+        
+            <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/28/565/242" alt="Vue2.x源码分析（二）：Vue实例挂载的实现">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-07T20:30:23.000Z">2020-04-07</time></div>
+                    <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（二）：Vue实例挂载的实现</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/406/565/242.jpg" alt="mr-progress-vue文档">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-05T18:18:10.000Z">2020-04-05</time></div>
+                    <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="title has-link-black-ter is-size-6 has-text-weight-normal">mr-progress-vue文档</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/23/565/242" alt="Vue2.x源码分析（一）：new Vue发生了什么">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-31T18:31:45.000Z">2020-03-31</time></div>
+                    <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（一）：new Vue发生了什么</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/112/565/242.jpg" alt="JS-Web-API（三）：Ajax">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:02:45.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（三）：Ajax</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/115/565/242.jpg" alt="JS-Web-API（二）：事件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:01:05.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（二）：事件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/03/">
+                <span class="level-start">
+                    <span class="level-item">三月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">9</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/4536251/">
+                        <span class="tag">4536251</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Ajax/">
+                        <span class="tag">Ajax</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/BOM/">
+                        <span class="tag">BOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/DOM/">
+                        <span class="tag">DOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript/">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript%E5%9F%BA%E7%A1%80/">
+                        <span class="tag">JavaScript基础</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Jazz/">
+                        <span class="tag">Jazz</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Koa/">
+                        <span class="tag">Koa</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Nuxt/">
+                        <span class="tag">Nuxt</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/R-B/">
+                        <span class="tag">R&amp;B</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RESTFUL/">
+                        <span class="tag">RESTFUL</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue/">
+                        <span class="tag">Vue</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+                        <span class="tag">Vue源码分析</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Web-Api/">
+                        <span class="tag">Web Api</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/cms/">
+                        <span class="tag">cms</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/this/">
+                        <span class="tag">this</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/">
+                        <span class="tag">万能和声进行</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6/">
+                        <span class="tag">事件</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/">
+                        <span class="tag">事件代理</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/">
+                        <span class="tag">事件冒泡</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/">
+                        <span class="tag">作用域</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B/">
+                        <span class="tag">原型</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/">
+                        <span class="tag">原型链</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8F%98%E9%87%8F/">
+                        <span class="tag">变量</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%90%8E%E7%AB%AF/">
+                        <span class="tag">后端</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BA%93/">
+                        <span class="tag">库</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BC%82%E6%AD%A5/">
+                        <span class="tag">异步</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E7%88%AC%E8%99%AB/">
+                        <span class="tag">爬虫</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E9%97%AD%E5%8C%85/">
+                        <span class="tag">闭包</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right is-sticky">
+    
+        <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/28/565/242" alt="Vue2.x源码分析（二）：Vue实例挂载的实现">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-07T20:30:23.000Z">2020-04-07</time></div>
+                    <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（二）：Vue实例挂载的实现</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/406/565/242.jpg" alt="mr-progress-vue文档">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-05T18:18:10.000Z">2020-04-05</time></div>
+                    <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="title has-link-black-ter is-size-6 has-text-weight-normal">mr-progress-vue文档</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/23/565/242" alt="Vue2.x源码分析（一）：new Vue发生了什么">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-31T18:31:45.000Z">2020-03-31</time></div>
+                    <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（一）：new Vue发生了什么</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/112/565/242.jpg" alt="JS-Web-API（三）：Ajax">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:02:45.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（三）：Ajax</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/115/565/242.jpg" alt="JS-Web-API（二）：事件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:01:05.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（二）：事件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/03/">
+                <span class="level-start">
+                    <span class="level-item">三月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">9</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/4536251/">
+                        <span class="tag">4536251</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Ajax/">
+                        <span class="tag">Ajax</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/BOM/">
+                        <span class="tag">BOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/DOM/">
+                        <span class="tag">DOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript/">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript%E5%9F%BA%E7%A1%80/">
+                        <span class="tag">JavaScript基础</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Jazz/">
+                        <span class="tag">Jazz</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Koa/">
+                        <span class="tag">Koa</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Nuxt/">
+                        <span class="tag">Nuxt</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/R-B/">
+                        <span class="tag">R&amp;B</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RESTFUL/">
+                        <span class="tag">RESTFUL</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue/">
+                        <span class="tag">Vue</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+                        <span class="tag">Vue源码分析</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Web-Api/">
+                        <span class="tag">Web Api</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/cms/">
+                        <span class="tag">cms</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/this/">
+                        <span class="tag">this</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/">
+                        <span class="tag">万能和声进行</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6/">
+                        <span class="tag">事件</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/">
+                        <span class="tag">事件代理</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/">
+                        <span class="tag">事件冒泡</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/">
+                        <span class="tag">作用域</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B/">
+                        <span class="tag">原型</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/">
+                        <span class="tag">原型链</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8F%98%E9%87%8F/">
+                        <span class="tag">变量</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%90%8E%E7%AB%AF/">
+                        <span class="tag">后端</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BA%93/">
+                        <span class="tag">库</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BC%82%E6%AD%A5/">
+                        <span class="tag">异步</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E7%88%AC%E8%99%AB/">
+                        <span class="tag">爬虫</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E9%97%AD%E5%8C%85/">
+                        <span class="tag">闭包</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo.svg" alt="Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2020 John Doe&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+
+<script>
+var IcarusThemeSettings = {
+    site: {
+        url: 'https://www.imuboy.cn',
+        external_link: {"enable":true,"exclude":[]}
+    },
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+
+
+<script src="/js/animation.js"></script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>

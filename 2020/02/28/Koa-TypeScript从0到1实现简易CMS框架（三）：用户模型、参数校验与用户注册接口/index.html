@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html  lang="zh">
+<head>
+    <!--
+ * @Author: MuRong
+ * @Date: 2020-02-27 18:55:43
+ * @LastEditors: MuRong
+ * @LastEditTime: 2020-02-27 19:14:51
+ * @Description: 
+ * @FilePath: \My-Blog-For-Hexo\themes\icarus\layout\common\head.ejs
+ -->
+<meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 4.2.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口 - MuRong&#39;Blog | 一位热爱音乐制作的web前端程序员</title>
+
+
+    <meta name="description" content="目录 Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置   Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理 Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口    项目地址：koa-typescript-cms  前言用户系统是一个cms最重要的部分，也是最复杂的部分，需要进行很多">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口">
+<meta property="og:url" content="https://www.imuboy.cn/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9A%E7%94%A8%E6%88%B7%E6%A8%A1%E5%9E%8B%E3%80%81%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C%E4%B8%8E%E7%94%A8%E6%88%B7%E6%B3%A8%E5%86%8C%E6%8E%A5%E5%8F%A3/index.html">
+<meta property="og:site_name" content="MuRong&#39;Blog | 一位热爱音乐制作的web前端程序员">
+<meta property="og:description" content="目录 Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置   Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理 Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口    项目地址：koa-typescript-cms  前言用户系统是一个cms最重要的部分，也是最复杂的部分，需要进行很多">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.picsum.photos/id/123/565/242.jpg">
+<meta property="article:published_time" content="2020-02-28T08:25:36.000Z">
+<meta property="article:modified_time" content="2020-07-08T06:52:46.905Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Koa">
+<meta property="article:tag" content="cms">
+<meta property="article:tag" content="后端">
+<meta property="article:tag" content="RESTFUL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.picsum.photos/id/123/565/242.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon.svg">
+
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="is-3-column">
+    <!--
+ * @Author: MuRong
+ * @Date: 2020-02-27 18:55:43
+ * @LastEditors: MuRong
+ * @LastEditTime: 2020-02-27 19:47:58
+ * @Description: 
+ * @FilePath: \My-Blog-For-Hexo\themes\hexo-icarus\layout\common\navbar.ejs
+ -->
+<nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <!-- <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo.svg" alt="Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口" height="28">
+            
+            </a> -->
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">Home</a>
+                
+                <a class="navbar-item"
+                href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81/">Music Works</a>
+                
+                <a class="navbar-item"
+                href="/categories">Categories</a>
+                
+                <a class="navbar-item"
+                href="/tags">Tags</a>
+                
+                <a class="navbar-item"
+                href="/about">About</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/MuRongXiaoDouBi">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+            <img class="thumbnail" src="https://i.picsum.photos/id/123/565/242.jpg" alt="Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2020-02-28T08:25:36.000Z">2020-02-28</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/">WEB后端</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/NodeJs/">NodeJs</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/NodeJs/TypeScript/">TypeScript</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    20 分钟 读完 (大约 2972 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口
+            
+        </h1>
+        <div class="content">
+            <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置/">Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置</a>  </li>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理/">Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理</a></li>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口/">Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口</a>  </li>
+</ul>
+<p>项目地址：<a href="https://github.com/MuRongXiaoDouBi/koa-typescript-cms">koa-typescript-cms</a> </p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>用户系统是一个cms最重要的部分，也是最复杂的部分，需要进行很多安全处理。<br>每次用户请求接口时，我们要进行参数校验，以防用户传入危险以及不规范数据</p>
+<h2 id="主要工具库"><a href="#主要工具库" class="headerlink" title="主要工具库"></a>主要工具库</h2><ul>
+<li><strong>koa</strong>   web框架</li>
+<li><strong>koa-bodyparser</strong> 处理koa post请求</li>
+<li><strong>koa-router</strong> koa路由</li>
+<li><strong>sequelize、sequelize-typescript、mysql2</strong> ORM框架与Mysql</li>
+<li><strong>validator、class-validator</strong> 参数校验</li>
+<li><strong>jsonwebtoken</strong> jwt</li>
+<li><strong>bcryptjs</strong> 加密工具</li>
+<li><strong>reflect-metadata</strong> 给装饰器添加各种信息</li>
+<li><strong>nodemon</strong> 监听文件改变自动重启服务</li>
+<li><strong>lodash</strong> 非常好用的工具函数库</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="项目目录"><a href="#项目目录" class="headerlink" title="项目目录"></a>项目目录</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">├── dist                                        &#x2F;&#x2F; ts编译后的文件</span><br><span class="line">├── src                                         &#x2F;&#x2F; 源码目录</span><br><span class="line">│   ├── components                              &#x2F;&#x2F; 组件</span><br><span class="line">│   │   ├── app                                 &#x2F;&#x2F; 项目业务代码</span><br><span class="line">│   │   │   ├── api                             &#x2F;&#x2F; api层</span><br><span class="line">│   │   │   ├── service                         &#x2F;&#x2F; service层</span><br><span class="line">│   │   │   ├── model                           &#x2F;&#x2F; model层</span><br><span class="line">│   │   │   ├── validators                      &#x2F;&#x2F; 参数校验类</span><br><span class="line">│   │   │   ├── lib                             &#x2F;&#x2F; interface与enum</span><br><span class="line">│   │   ├── core                                &#x2F;&#x2F; 项目核心代码</span><br><span class="line">│   │   ├── middlewares                         &#x2F;&#x2F; 中间件</span><br><span class="line">│   │   ├── config                              &#x2F;&#x2F; 全局配置文件</span><br><span class="line">│   │   ├── app.ts                              &#x2F;&#x2F; 项目入口文件</span><br><span class="line">├── tests                                       &#x2F;&#x2F; 单元测试</span><br><span class="line">├── package.json                                &#x2F;&#x2F; package.json                                </span><br><span class="line">├── tsconfig.json                               &#x2F;&#x2F; ts配置文件</span><br></pre></td></tr></table></figure>
+
+<h2 id="初始化Sequelize配置"><a href="#初始化Sequelize配置" class="headerlink" title="初始化Sequelize配置"></a>初始化Sequelize配置</h2><p>再<code>src/core</code>目录下创建<code>db.ts</code>文件，引入<code>sequelize-typescript</code>与<code>config.ts</code>配置文件。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Sequelize, Model &#125; <span class="keyword">from</span> <span class="string">"sequelize-typescript"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; config, databaseInterface &#125; <span class="keyword">from</span> <span class="string">"../config/config"</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="初始化数据库信息"><a href="#初始化数据库信息" class="headerlink" title="初始化数据库信息"></a>初始化数据库信息</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 数据库配置信息</span></span><br><span class="line"><span class="keyword">const</span> &#123; dbName, user, password, host, port &#125;: databaseInterface = config.database;</span><br><span class="line"><span class="comment">// 初始化Sequelize</span></span><br><span class="line"><span class="keyword">const</span> sequelize: Sequelize = <span class="keyword">new</span> Sequelize(</span><br><span class="line">  dbName, <span class="comment">// 数据库名称</span></span><br><span class="line">  user, <span class="comment">// 数据库用户名</span></span><br><span class="line">  password, <span class="comment">// 数据库密码</span></span><br><span class="line">  &#123;</span><br><span class="line">    dialect: <span class="string">"mysql"</span>, <span class="comment">// 数据库引擎</span></span><br><span class="line">    host, <span class="comment">// 数据库地址</span></span><br><span class="line">    port, <span class="comment">// 数据库端口</span></span><br><span class="line">    logging: <span class="literal">true</span>, <span class="comment">// 是否打印日志</span></span><br><span class="line">    timezone: <span class="string">"+08:00"</span>, <span class="comment">// 设置数据库市区，建议设置，mysql默认的时区比东八区少了八个小时</span></span><br><span class="line">    define: &#123;</span><br><span class="line">      timestamps: <span class="literal">true</span>, <span class="comment">// 为模型添加 createdAt 和 updatedAt 两个时间戳字段</span></span><br><span class="line">      paranoid: <span class="literal">true</span>, <span class="comment">// 使用逻辑删除。设置为true后，调用 destroy 方法时将不会删队模型，而是设置一个 deletedAt 列。此设置需要 timestamps=true</span></span><br><span class="line">      underscored: <span class="literal">true</span>, <span class="comment">// 转换列名的驼峰命名规则为下划线命令规则</span></span><br><span class="line">      freezeTableName: <span class="literal">true</span> <span class="comment">// 转换模型名的驼峰命名规则为表名的下划线命令规则</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置sequelize是否自动建表"><a href="#设置sequelize是否自动建表" class="headerlink" title="设置sequelize是否自动建表"></a>设置<code>sequelize</code>是否自动建表</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sequelize.sync(&#123;</span><br><span class="line">  <span class="comment">// 是否自动建表</span></span><br><span class="line">  force: <span class="literal">false</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="JSON序列化"><a href="#JSON序列化" class="headerlink" title="JSON序列化"></a>JSON序列化</h3><p>JSON序列化是使<code>sequelize</code>每次返回都默认排除我们不想要的字段。    <code>sequelize</code>的<code>Model</code>的原型上会有一个<code>toJSON</code>方法，这个是<code>Model</code>默认的序列化方法，我们要重写它这个方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Model.prototype.toJSON = <span class="function"><span class="keyword">function</span>(<span class="params"></span>): <span class="title">object</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 浅拷贝从数据库获取到的数据</span></span><br><span class="line">  <span class="keyword">let</span> data = clone(<span class="keyword">this</span>[<span class="string">'dataValues'</span>])</span><br><span class="line">  <span class="comment">// 删除指定字段</span></span><br><span class="line">  unset(data, <span class="string">'updatedAt'</span>)</span><br><span class="line">  unset(data, <span class="string">'deletedAt'</span>)</span><br><span class="line">  <span class="comment">// 这个是自己再Model原型上定义的变量</span></span><br><span class="line">  <span class="comment">// 用于控制我们再某次查询数据时想要排除的其他字段</span></span><br><span class="line">  <span class="comment">// 类型为数组，数组的值便是想要排除的字段</span></span><br><span class="line">  <span class="comment">// 例如user.exclude['a', 'b']，此次查询将会增加排除a,b字段</span></span><br><span class="line">  <span class="keyword">if</span>(isArray(<span class="keyword">this</span>[<span class="string">'exclude'</span>])) &#123;</span><br><span class="line">    <span class="keyword">this</span>[<span class="string">'exclude'</span>].forEach(<span class="function"><span class="params">value</span> =&gt;</span> &#123;</span><br><span class="line">      unset(data, value)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> data;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="全部代码"><a href="#全部代码" class="headerlink" title="全部代码"></a>全部代码</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Sequelize, Model &#125; <span class="keyword">from</span> <span class="string">"sequelize-typescript"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; config, databaseInterface &#125; <span class="keyword">from</span> <span class="string">"../config/config"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; unset,clone, isArray &#125; <span class="keyword">from</span> <span class="string">"lodash"</span>;</span><br><span class="line"><span class="comment">// 数据库配置信息</span></span><br><span class="line"><span class="keyword">const</span> &#123;</span><br><span class="line">  dbName,</span><br><span class="line">  user,</span><br><span class="line">  password,</span><br><span class="line">  host,</span><br><span class="line">  port</span><br><span class="line">&#125;: databaseInterface = config.database;</span><br><span class="line"><span class="comment">// 初始化Sequelize</span></span><br><span class="line"><span class="keyword">const</span> sequelize: Sequelize = <span class="keyword">new</span> Sequelize(</span><br><span class="line">  dbName, <span class="comment">// 数据库名称</span></span><br><span class="line">  user, <span class="comment">// 数据库用户名</span></span><br><span class="line">  password, <span class="comment">// 数据库密码</span></span><br><span class="line">  &#123;</span><br><span class="line">    dialect: <span class="string">"mysql"</span>, <span class="comment">// 数据库引擎</span></span><br><span class="line">    host, <span class="comment">// 数据库地址</span></span><br><span class="line">    port, <span class="comment">// 数据库端口</span></span><br><span class="line">    logging: <span class="literal">true</span>, <span class="comment">// 是否打印日志</span></span><br><span class="line">    timezone: <span class="string">"+08:00"</span>, <span class="comment">// 设置数据库市区，建议设置，mysql默认的时区比东八区少了八个小时</span></span><br><span class="line">    define: &#123;</span><br><span class="line">      timestamps: <span class="literal">true</span>, <span class="comment">// 为模型添加 createdAt 和 updatedAt 两个时间戳字段</span></span><br><span class="line">      paranoid: <span class="literal">true</span>, <span class="comment">// 使用逻辑删除。设置为true后，调用 destroy 方法时将不会删队模型，而是设置一个 deletedAt 列。此设置需要 timestamps=true</span></span><br><span class="line">      underscored: <span class="literal">true</span>, <span class="comment">// 转换列名的驼峰命名规则为下划线命令规则</span></span><br><span class="line">      freezeTableName: <span class="literal">true</span> <span class="comment">// 转换模型名的驼峰命名规则为表名的下划线命令规则</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">sequelize.sync(&#123;</span><br><span class="line">  <span class="comment">// 是否自动建表</span></span><br><span class="line">  force: <span class="literal">false</span></span><br><span class="line">&#125;);</span><br><span class="line">Model.prototype.toJSON = <span class="function"><span class="keyword">function</span>(<span class="params"></span>): <span class="title">object</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 浅拷贝从数据库获取到的数据</span></span><br><span class="line">  <span class="keyword">let</span> data = clone(<span class="keyword">this</span>[<span class="string">'dataValues'</span>])</span><br><span class="line">  <span class="comment">// 删除指定字段</span></span><br><span class="line">  unset(data, <span class="string">'updatedAt'</span>)</span><br><span class="line">  unset(data, <span class="string">'deletedAt'</span>)</span><br><span class="line">  <span class="comment">// 这个是自己再Model原型上定义的变量</span></span><br><span class="line">  <span class="comment">// 用于控制我们再某次查询数据时想要排除的其他字段</span></span><br><span class="line">  <span class="comment">// 类型为数组，数组的值便是想要排除的字段</span></span><br><span class="line">  <span class="comment">// 例如user.exclude['a', 'b']，此次查询将会增加排除a,b字段</span></span><br><span class="line">  <span class="keyword">if</span>(isArray(<span class="keyword">this</span>[<span class="string">'exclude'</span>])) &#123;</span><br><span class="line">    <span class="keyword">this</span>[<span class="string">'exclude'</span>].forEach(<span class="function"><span class="params">value</span> =&gt;</span> &#123;</span><br><span class="line">      unset(data, value)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> data;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">export</span> &#123; sequelize &#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="创建Users模型"><a href="#创建Users模型" class="headerlink" title="创建Users模型"></a>创建Users模型</h2><p><code>sequelize-typescript</code>创建模型和<code>sequelize</code>创建模型区别还是挺大的，<code>sequelize-typescript</code>中大部分字段的配置都是基于装饰器来实现。下面直接贴上代码，基本看一遍就知道怎么回事了。  </p>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li><strong>千万不要忘记@Table装饰器，少写这个装饰器会报错</strong></li>
+<li><strong>也不要忘记向Model里传入泛型</strong></li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; sequelize &#125; <span class="keyword">from</span> <span class="string">"../../core/db"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  Model,</span><br><span class="line">  Table,</span><br><span class="line">  Column,</span><br><span class="line">  DataType,</span><br><span class="line">  PrimaryKey,</span><br><span class="line">  AutoIncrement,</span><br><span class="line">  Unique,</span><br><span class="line">  Comment,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">"sequelize-typescript"</span>;</span><br><span class="line"><span class="comment">// 千万不要忘记Table装饰器，少写这个装饰器会报错</span></span><br><span class="line"><span class="comment">// 也不要忘记向Model里传入泛型</span></span><br><span class="line">@Table</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Users</span> <span class="keyword">extends</span> <span class="title">Model</span>&lt;<span class="title">Users</span>&gt; </span>&#123;</span><br><span class="line">  @PrimaryKey</span><br><span class="line">  @AutoIncrement</span><br><span class="line">  @Comment(<span class="string">"ID"</span>)</span><br><span class="line">  @Column(DataType.INTEGER)</span><br><span class="line">  id?: number;</span><br><span class="line"></span><br><span class="line">  @Comment(<span class="string">"用户昵称"</span>)</span><br><span class="line">  @Column(DataType.STRING(<span class="number">128</span>))</span><br><span class="line">  nickname?: string;</span><br><span class="line"></span><br><span class="line">  @Unique</span><br><span class="line">  @Comment(<span class="string">"用户邮箱"</span>)</span><br><span class="line">  @Column(DataType.STRING(<span class="number">128</span>))</span><br><span class="line">  email?: string;</span><br><span class="line"></span><br><span class="line">  @Comment(<span class="string">"用户密码"</span>)</span><br><span class="line">  @Column(DataType.STRING(<span class="number">64</span>))</span><br><span class="line">  password?: string;</span><br><span class="line"></span><br><span class="line">  @Unique</span><br><span class="line">  @Comment(<span class="string">"微信小程序openid"</span>)</span><br><span class="line">  @Column(DataType.STRING(<span class="number">128</span>))</span><br><span class="line">  openid?: string;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">sequelize.addModels([Users]);</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> Users;</span><br></pre></td></tr></table></figure>
+
+<h2 id="参数校验"><a href="#参数校验" class="headerlink" title="参数校验"></a>参数校验</h2><blockquote>
+<p>参数校验是一个系统中必不可少的部分，尤其是前后端分离的架构模式，为了更方便的使用参数校验，我们需要自己封装一个类，实现代码更高的复用性，此类模仿<code>lin-cms-koa</code>的参数校验的基本功能进行封装。</p>
+</blockquote>
+<h3 id="Validator封装"><a href="#Validator封装" class="headerlink" title="Validator封装"></a>Validator封装</h3><p>在<code>src/core</code>文件夹下创建<code>validator.ts</code>文件，引入需要的依赖：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; validateOrReject &#125; <span class="keyword">from</span> <span class="string">"class-validator"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Context &#125; <span class="keyword">from</span> <span class="string">"koa"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; cloneDeep &#125; <span class="keyword">from</span> <span class="string">"lodash"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; ParametersException &#125; <span class="keyword">from</span> <span class="string">"./exception"</span>;</span><br></pre></td></tr></table></figure>
+<p><code>Validator</code>类封装思路：</p>
+<ol>
+<li>解析koa的<code>Context</code>，获取到可能接收到用户传来的参数的字段，进行拍平（扁平化）</li>
+<li>遍历所有参数，将它们的<code>key</code>挂载到原型上。</li>
+<li>使用<code>class-validator</code>进行参数校验。</li>
+</ol>
+<p>实现代码:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">Validator</span> </span>&#123;</span><br><span class="line">  <span class="keyword">async</span> validate(ctx: Context) &#123;</span><br><span class="line">    <span class="keyword">const</span> params = &#123;</span><br><span class="line">      ...ctx.request.body,</span><br><span class="line">      ...ctx.request.query,</span><br><span class="line">      ...ctx.params</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">const</span> data = cloneDeep(params);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> key <span class="keyword">in</span> params) &#123;</span><br><span class="line">      <span class="keyword">this</span>[key] = params[key];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">await</span> validateOrReject(<span class="keyword">this</span>);</span><br><span class="line">      <span class="keyword">return</span> data;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (errors) &#123;</span><br><span class="line">      <span class="keyword">let</span> errorResult: string[] = [];</span><br><span class="line">      errors.forEach(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> messages: string[] = [];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">let</span> msg <span class="keyword">in</span> error.constraints) &#123;</span><br><span class="line">          messages.push(error.constraints[msg]);</span><br><span class="line">        &#125;</span><br><span class="line">        errorResult = errorResult.concat(messages)</span><br><span class="line">      &#125;);</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> ParametersException(&#123; <span class="attr">msg</span>: errorResult &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>具体使用方式在用户注册接口时进行演示</strong></p>
+</blockquote>
+<h2 id="用户注册接口"><a href="#用户注册接口" class="headerlink" title="用户注册接口"></a>用户注册接口</h2><h3 id="创建-v1-user-register路由"><a href="#创建-v1-user-register路由" class="headerlink" title="创建/v1/user/register路由"></a>创建<code>/v1/user/register</code>路由</h3><p>在<code>src/app/api/v1</code>目录下创建<code>users.ts</code>文件，由于我们之前写了路由自动注册功能，所以我们只需要将路由导出即可，不需要再<code>app.ts</code>中引入路由。</p>
+<p>引入<code>koa-router</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Router <span class="keyword">from</span> <span class="string">"koa-router"</span>;</span><br><span class="line"><span class="keyword">const</span> router: Router = <span class="keyword">new</span> Router();</span><br></pre></td></tr></table></figure>
+<p>设置路由的<code>prefix</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">router.prefix(<span class="string">"/v1/user"</span>);</span><br></pre></td></tr></table></figure>
+<p>创建路由：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">router.post(<span class="string">"/register"</span>, <span class="keyword">async</span> ctx =&gt; &#123;&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="参数校验-1"><a href="#参数校验-1" class="headerlink" title="参数校验"></a>参数校验</h3><p>上文我们已经将<code>Validator</code>类封装好了，在<code>src/app/validators</code>目录下创建<code>UsersValidator.ts</code>文件，参数校验是基于<code>class-validator</code>，具体使用方式可以观看<a href="https://github.com/typestack/class-validator">官网文档</a>，直接上基础代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 注册验证类</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@export</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@class <span class="variable">RegistorValidator</span></span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@extends <span class="type">&#123;Validator&#125;</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">RegistorValidator</span> <span class="keyword">extends</span> <span class="title">Validator</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  @Length(<span class="number">3</span>, <span class="number">10</span>, &#123;</span><br><span class="line">    message: <span class="string">"用户名长度为3~10个字符"</span></span><br><span class="line">  &#125;)</span><br><span class="line">  nickname?: string;</span><br><span class="line">  @IsEmail(&#123;&#125;,&#123; <span class="attr">message</span>: <span class="string">"电子邮箱格式错误"</span> &#125;)</span><br><span class="line">  email?: string;</span><br><span class="line">  @Validate(CheckPassword)</span><br><span class="line">  <span class="comment">// 至少8-16个字符，至少1个大写字母，1个小写字母和1个数字，其他可以是任意字符：</span></span><br><span class="line">  @Matches(<span class="regexp">/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]&#123;8,16&#125;$/</span>, &#123;</span><br><span class="line">    message: <span class="string">"密码至少8-16个字符，至少1个大写字母，1个小写字母和1个数字"</span></span><br><span class="line">  &#125;)</span><br><span class="line">  password1?: string;</span><br><span class="line">  password2?: string;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于我们需要判断<code>password1</code>和<code>password2</code>是否相等，<code>class-validator</code>没有相似功能，我们自己创建一个校验方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 验证密码自定义装饰器</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@class <span class="variable">CheckPassword</span></span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@implements <span class="type">&#123;ValidatorConstraintInterface&#125;</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">@ValidatorConstraint()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CheckPassword</span> <span class="title">implements</span> <span class="title">ValidatorConstraintInterface</span> </span>&#123;</span><br><span class="line">  validate(text: string, <span class="attr">args</span>: ValidationArguments): boolean &#123;</span><br><span class="line">    <span class="keyword">const</span> obj: any = args.object;</span><br><span class="line">    <span class="keyword">return</span> obj.password1 === obj.password2;</span><br><span class="line">  &#125;</span><br><span class="line">  defaultMessage() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">"两次输入密码不一致"</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>password1</code>属性上可以直接使用装饰器挂载这个自定义方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@Validate(CheckPassword)</span><br><span class="line">password1?: string;</span><br></pre></td></tr></table></figure>
+<p>至此注册接口的校验器完成，全部代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  Length,</span><br><span class="line">  IsEmail,</span><br><span class="line">  Matches,</span><br><span class="line">  Validate,</span><br><span class="line">  ValidatorConstraintInterface,</span><br><span class="line">  ValidatorConstraint,</span><br><span class="line">  ValidationArguments</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">"class-validator"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> &#123; Validator &#125; <span class="keyword">from</span> <span class="string">"../../core/validator"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 验证密码自定义装饰器</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@class <span class="variable">CheckPassword</span></span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@implements <span class="type">&#123;ValidatorConstraintInterface&#125;</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">@ValidatorConstraint()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CheckPassword</span> <span class="title">implements</span> <span class="title">ValidatorConstraintInterface</span> </span>&#123;</span><br><span class="line">  validate(text: string, <span class="attr">args</span>: ValidationArguments): boolean &#123;</span><br><span class="line">    <span class="keyword">const</span> obj: any = args.object;</span><br><span class="line">    <span class="keyword">return</span> obj.password1 === obj.password2;</span><br><span class="line">  &#125;</span><br><span class="line">  defaultMessage() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">"两次输入密码不一致"</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 注册验证类</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@export</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@class <span class="variable">RegistorValidator</span></span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@extends <span class="type">&#123;Validator&#125;</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">RegistorValidator</span> <span class="keyword">extends</span> <span class="title">Validator</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  @Length(<span class="number">3</span>, <span class="number">10</span>, &#123;</span><br><span class="line">    message: <span class="string">"用户名长度为3~10个字符"</span></span><br><span class="line">  &#125;)</span><br><span class="line">  nickname?: string;</span><br><span class="line">  @IsEmail(&#123;&#125;,&#123; <span class="attr">message</span>: <span class="string">"电子邮箱格式错误"</span> &#125;)</span><br><span class="line">  email?: string;</span><br><span class="line">  @Validate(CheckPassword)</span><br><span class="line">  <span class="comment">// 至少8-16个字符，至少1个大写字母，1个小写字母和1个数字，其他可以是任意字符：</span></span><br><span class="line">  @Matches(<span class="regexp">/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]&#123;8,16&#125;$/</span>, &#123;</span><br><span class="line">    message: <span class="string">"密码至少8-16个字符，至少1个大写字母，1个小写字母和1个数字"</span></span><br><span class="line">  &#125;)</span><br><span class="line">  password1?: string;</span><br><span class="line">  password2?: string;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在路由文件中使用校验器，调用校验器类上的<code>validate</code>方法，将<code>koa</code>的<code>Context</code>传入。<br>如果校验成功则将请求参数封装成一个对象并返回，<br>如果失败则直接利用全局异常处理中间件 向客户抛出错误信息：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">router.post(<span class="string">"/register"</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> v: registerInterface = <span class="keyword">await</span> <span class="keyword">new</span> RegistorValidator().validate(ctx);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>registerInterface</code>接口存放了注册所需要的参数，代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> interface registerInterface &#123;</span><br><span class="line">  email: string;</span><br><span class="line">  nickname: string;</span><br><span class="line">  password1: string;</span><br><span class="line">  password2: string;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="实现注册功能"><a href="#实现注册功能" class="headerlink" title="实现注册功能"></a>实现注册功能</h3><p>在<code>src/app/service</code>目录下创建<code>users.ts</code>文件，此目录专门存放进行数据库业务操作的文件。</p>
+<p>在<code>users.ts</code>中创建<code>UsersService</code>类，在类中创建静态方法<code>userRegister</code>，此方法进行注册操作。</p>
+<p><strong>注册步骤：</strong></p>
+<ol>
+<li>判断数据库中是否存在此用户</li>
+<li>如果存在则向用户抛出异常</li>
+<li>如果不存在则将数据插入数据库</li>
+</ol>
+<p>业务代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">async</span> userRegister(params: registerInterface) &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; email, nickname, password1 &#125; = params;</span><br><span class="line">  <span class="keyword">const</span> data = &#123;</span><br><span class="line">    email,</span><br><span class="line">    nickname,</span><br><span class="line">    password: password1</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="keyword">const</span> isExistEmail = <span class="keyword">await</span> Users.findOne(&#123;</span><br><span class="line">    where: &#123;</span><br><span class="line">      email</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">if</span> (isExistEmail) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> Failed(&#123; <span class="attr">msg</span>: <span class="string">"Email已存在"</span> &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> r = <span class="keyword">await</span> Users.create(data);</span><br><span class="line">  <span class="keyword">return</span> r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>全部代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Users <span class="keyword">from</span> <span class="string">"../models/users"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Failed &#125; <span class="keyword">from</span> <span class="string">"../../core/exception"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; registerInterface &#125; <span class="keyword">from</span> <span class="string">"../lib/interface/UsersInterface"</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UsersService</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">async</span> userRegister(params: registerInterface) &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; email, nickname, password1 &#125; = params;</span><br><span class="line">    <span class="keyword">const</span> data = &#123;</span><br><span class="line">      email,</span><br><span class="line">      nickname,</span><br><span class="line">      password: password1</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">const</span> isExistEmail = <span class="keyword">await</span> Users.findOne(&#123;</span><br><span class="line">      where: &#123;</span><br><span class="line">        email</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">if</span> (isExistEmail) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> Failed(&#123; <span class="attr">msg</span>: <span class="string">"Email已存在"</span> &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">const</span> r = <span class="keyword">await</span> Users.create(data);</span><br><span class="line">    <span class="keyword">return</span> r;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> UsersService;</span><br></pre></td></tr></table></figure>
+<p>在路由中引入注册功能代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">router.post(<span class="string">"/register"</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> v: registerInterface = <span class="keyword">await</span> <span class="keyword">new</span> RegistorValidator().validate(ctx);</span><br><span class="line">  <span class="keyword">const</span> r = <span class="keyword">await</span> UsersService.userRegister(v);</span><br><span class="line">  <span class="keyword">if</span> (r) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> Success();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> Failed(&#123;<span class="attr">msg</span>: <span class="string">'注册失败'</span>&#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="路由文件全部代码："><a href="#路由文件全部代码：" class="headerlink" title="路由文件全部代码："></a>路由文件全部代码：</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Router <span class="keyword">from</span> <span class="string">"koa-router"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; RegistorValidator &#125; <span class="keyword">from</span> <span class="string">"../../validators/UsersValidator"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Success, Failed &#125; <span class="keyword">from</span> <span class="string">"../../../core/exception"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; registerInterface &#125; <span class="keyword">from</span> <span class="string">'../../lib/interface/UsersInterface'</span>;</span><br><span class="line"><span class="keyword">import</span> UsersService <span class="keyword">from</span> <span class="string">'../../service/users'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router: Router = <span class="keyword">new</span> Router();</span><br><span class="line">router.prefix(<span class="string">"/v1/user"</span>);</span><br><span class="line"></span><br><span class="line">router.post(<span class="string">"/register"</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> v: registerInterface = <span class="keyword">await</span> <span class="keyword">new</span> RegistorValidator().validate(ctx);</span><br><span class="line">  <span class="keyword">const</span> r = <span class="keyword">await</span> UsersService.userRegister(v);</span><br><span class="line">  <span class="keyword">if</span> (r) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> Success();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> Failed(&#123;<span class="attr">msg</span>: <span class="string">'注册失败'</span>&#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 这里一定要用commonjs规范导出</span></span><br><span class="line"><span class="built_in">module</span>.exports = router;</span><br></pre></td></tr></table></figure>
+<h2 id="更新中……"><a href="#更新中……" class="headerlink" title="更新中……"></a>更新中……</h2>
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Koa/" rel="tag">Koa</a>, <a class="has-link-grey -link" href="/tags/RESTFUL/" rel="tag">RESTFUL</a>, <a class="has-link-grey -link" href="/tags/cms/" rel="tag">cms</a>, <a class="has-link-grey -link" href="/tags/%E5%90%8E%E7%AB%AF/" rel="tag">后端</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+        <div class="social-share"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css">
+<script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3>
+        <div class="buttons is-centered">
+            
+                
+<a class="button is-info donate">
+    <span class="icon is-small">
+        <i class="fab fa-alipay"></i>
+    </span>
+    <span>支付宝</span>
+    <div class="qrcode"><img src="/images/alipay.jpg" alt="支付宝"></div>
+</a>
+
+                
+                
+<a class="button is-success donate">
+    <span class="icon is-small">
+        <i class="fab fa-weixin"></i>
+    </span>
+    <span>微信</span>
+    <div class="qrcode"><img src="/images/wechatPay.jpg" alt="微信"></div>
+</a>
+
+                
+        </div>
+    </div>
+</div>
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2020/02/28/JS%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9A%E4%BD%9C%E7%94%A8%E5%9F%9F%E4%B8%8E%E9%97%AD%E5%8C%85/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">JS基础知识（三）：作用域与闭包</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E8%B7%AF%E7%94%B1%E8%87%AA%E5%8A%A8%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/">
+                <span class="level-item">Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="valine-thread" class="content"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#valine-thread' ,
+        notify: true,
+        verify: true,
+        app_id: 'AGgzzAiyMMYQpiL9PA7Pb5cS-gzGzoHsz',
+        app_key: 'BlPRUwYfb5kCvacFDeDxGWJf',
+        placeholder: '来吐槽我吧！！！'
+    });
+</script>
+
+    </div>
+</div>
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left is-sticky">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="is-rounded" src="/images/avatar.png" alt="Mu Rong">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        Mu Rong
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        Web Developer &amp; Music Producer
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>Shandong,China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <a href="/archives">
+                        <p class="title has-text-weight-normal">
+                            22
+                        </p>
+                    </a>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <a href="/categories">
+                        <p class="title has-text-weight-normal">
+                            14
+                        </p>
+                    </a>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <a href="/tags">
+                        <p class="title has-text-weight-normal">
+                            29
+                        </p>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="Github" href="https://github.com/MuRongXiaoDouBi">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="QQ:372638156" href="/">
+                
+                <i class="fab fa-qq"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="WX:g520cong" href="https://twitter.com">
+                
+                <i class="fab fa-weixin"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="微博" href="https://weibo.com/u/3673968282">
+                
+                <i class="fab fa-weibo"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" rel="noopener"
+                title="telegram:MuRongXDB" href="/">
+                
+                <i class="fab fa-telegram"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            链接
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="https://music.163.com/#/artist?id=12199466" target="_blank" rel="noopener">
+                    <span class="level-left">
+                        <span class="level-item">Music Home For 163</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">music.163.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://y.qq.com/n/yqq/singer/003bnFYh42Dc2M.html" target="_blank" rel="noopener">
+                    <span class="level-left">
+                        <span class="level-item">Music Home For QQ</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">y.qq.com</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="http://yueqiuyy.com/" target="_blank" rel="noopener">
+                    <span class="level-left">
+                        <span class="level-item">乐球网（音乐学习平台）</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">yueqiuyy.com</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">
+            <span class="level-start">
+                <span class="level-item">程序世界</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">19</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">
+            <span class="level-start">
+                <span class="level-item">JavaScript</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">7</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/NodeJs/">
+            <span class="level-start">
+                <span class="level-item">NodeJs</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">
+            <span class="level-start">
+                <span class="level-item">WEB前端</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">6</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/">
+            <span class="level-start">
+                <span class="level-item">WEB后端</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">3</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/python/">
+            <span class="level-start">
+                <span class="level-item">python</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
+            <span class="level-start">
+                <span class="level-item">设计模式</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/">
+            <span class="level-start">
+                <span class="level-item">音乐世界</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">3</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81/">
+            <span class="level-start">
+                <span class="level-item">音乐作品</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E6%9D%82%E8%B0%88/">
+            <span class="level-start">
+                <span class="level-item">音乐杂谈</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/4536251/" style="font-size: 10px;">4536251</a> <a href="/tags/Ajax/" style="font-size: 10px;">Ajax</a> <a href="/tags/BOM/" style="font-size: 10px;">BOM</a> <a href="/tags/DOM/" style="font-size: 10px;">DOM</a> <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/JavaScript%E5%9F%BA%E7%A1%80/" style="font-size: 16px;">JavaScript基础</a> <a href="/tags/Jazz/" style="font-size: 10px;">Jazz</a> <a href="/tags/Koa/" style="font-size: 14px;">Koa</a> <a href="/tags/Nuxt/" style="font-size: 10px;">Nuxt</a> <a href="/tags/R-B/" style="font-size: 10px;">R&B</a> <a href="/tags/RESTFUL/" style="font-size: 14px;">RESTFUL</a> <a href="/tags/Vue/" style="font-size: 18px;">Vue</a> <a href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" style="font-size: 12px;">Vue源码分析</a> <a href="/tags/Web-Api/" style="font-size: 14px;">Web Api</a> <a href="/tags/cms/" style="font-size: 14px;">cms</a> <a href="/tags/this/" style="font-size: 10px;">this</a> <a href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/" style="font-size: 10px;">万能和声进行</a> <a href="/tags/%E4%BA%8B%E4%BB%B6/" style="font-size: 10px;">事件</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/" style="font-size: 10px;">事件代理</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/" style="font-size: 10px;">事件冒泡</a> <a href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/" style="font-size: 10px;">作用域</a> <a href="/tags/%E5%8E%9F%E5%9E%8B/" style="font-size: 10px;">原型</a> <a href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/" style="font-size: 10px;">原型链</a> <a href="/tags/%E5%8F%98%E9%87%8F/" style="font-size: 10px;">变量</a> <a href="/tags/%E5%90%8E%E7%AB%AF/" style="font-size: 14px;">后端</a> <a href="/tags/%E5%BA%93/" style="font-size: 10px;">库</a> <a href="/tags/%E5%BC%82%E6%AD%A5/" style="font-size: 10px;">异步</a> <a href="/tags/%E7%88%AC%E8%99%AB/" style="font-size: 12px;">爬虫</a> <a href="/tags/%E9%97%AD%E5%8C%85/" style="font-size: 10px;">闭包</a>
+    </div>
+</div>
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen is-sticky">
+        
+            <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/28/565/242" alt="Vue2.x源码分析（二）：Vue实例挂载的实现">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-07T20:30:23.000Z">2020-04-07</time></div>
+                    <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（二）：Vue实例挂载的实现</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/406/565/242.jpg" alt="mr-progress-vue文档">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-05T18:18:10.000Z">2020-04-05</time></div>
+                    <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="title has-link-black-ter is-size-6 has-text-weight-normal">mr-progress-vue文档</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/23/565/242" alt="Vue2.x源码分析（一）：new Vue发生了什么">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-31T18:31:45.000Z">2020-03-31</time></div>
+                    <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（一）：new Vue发生了什么</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/112/565/242.jpg" alt="JS-Web-API（三）：Ajax">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:02:45.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（三）：Ajax</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/115/565/242.jpg" alt="JS-Web-API（二）：事件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:01:05.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（二）：事件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/03/">
+                <span class="level-start">
+                    <span class="level-item">三月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">9</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/4536251/">
+                        <span class="tag">4536251</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Ajax/">
+                        <span class="tag">Ajax</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/BOM/">
+                        <span class="tag">BOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/DOM/">
+                        <span class="tag">DOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript/">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript%E5%9F%BA%E7%A1%80/">
+                        <span class="tag">JavaScript基础</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Jazz/">
+                        <span class="tag">Jazz</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Koa/">
+                        <span class="tag">Koa</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Nuxt/">
+                        <span class="tag">Nuxt</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/R-B/">
+                        <span class="tag">R&amp;B</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RESTFUL/">
+                        <span class="tag">RESTFUL</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue/">
+                        <span class="tag">Vue</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+                        <span class="tag">Vue源码分析</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Web-Api/">
+                        <span class="tag">Web Api</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/cms/">
+                        <span class="tag">cms</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/this/">
+                        <span class="tag">this</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/">
+                        <span class="tag">万能和声进行</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6/">
+                        <span class="tag">事件</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/">
+                        <span class="tag">事件代理</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/">
+                        <span class="tag">事件冒泡</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/">
+                        <span class="tag">作用域</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B/">
+                        <span class="tag">原型</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/">
+                        <span class="tag">原型链</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8F%98%E9%87%8F/">
+                        <span class="tag">变量</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%90%8E%E7%AB%AF/">
+                        <span class="tag">后端</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BA%93/">
+                        <span class="tag">库</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BC%82%E6%AD%A5/">
+                        <span class="tag">异步</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E7%88%AC%E8%99%AB/">
+                        <span class="tag">爬虫</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E9%97%AD%E5%8C%85/">
+                        <span class="tag">闭包</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right is-sticky">
+    
+        <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/28/565/242" alt="Vue2.x源码分析（二）：Vue实例挂载的实现">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-07T20:30:23.000Z">2020-04-07</time></div>
+                    <a href="/2020/04/07/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AVue%E5%AE%9E%E4%BE%8B%E6%8C%82%E8%BD%BD%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（二）：Vue实例挂载的实现</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/406/565/242.jpg" alt="mr-progress-vue文档">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-04-05T18:18:10.000Z">2020-04-05</time></div>
+                    <a href="/2020/04/05/mr-progress-vue%E6%96%87%E6%A1%A3/" class="title has-link-black-ter is-size-6 has-text-weight-normal">mr-progress-vue文档</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://picsum.photos/id/23/565/242" alt="Vue2.x源码分析（一）：new Vue发生了什么">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-31T18:31:45.000Z">2020-03-31</time></div>
+                    <a href="/2020/03/31/Vue2.x%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AnewVue%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Vue2.x源码分析（一）：new Vue发生了什么</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%89%8D%E7%AB%AF/">WEB前端</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/112/565/242.jpg" alt="JS-Web-API（三）：Ajax">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:02:45.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（三）：Ajax</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="https://i.picsum.photos/id/115/565/242.jpg" alt="JS-Web-API（二）：事件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:01:05.000Z">2020-03-08</time></div>
+                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E4%BA%8B%E4%BB%B6/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（二）：事件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/03/">
+                <span class="level-start">
+                    <span class="level-item">三月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">6</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">9</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/4536251/">
+                        <span class="tag">4536251</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Ajax/">
+                        <span class="tag">Ajax</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/BOM/">
+                        <span class="tag">BOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/DOM/">
+                        <span class="tag">DOM</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript/">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag is-grey">10</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JavaScript%E5%9F%BA%E7%A1%80/">
+                        <span class="tag">JavaScript基础</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Jazz/">
+                        <span class="tag">Jazz</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Koa/">
+                        <span class="tag">Koa</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Nuxt/">
+                        <span class="tag">Nuxt</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/R-B/">
+                        <span class="tag">R&amp;B</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RESTFUL/">
+                        <span class="tag">RESTFUL</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue/">
+                        <span class="tag">Vue</span>
+                        <span class="tag is-grey">6</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+                        <span class="tag">Vue源码分析</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Web-Api/">
+                        <span class="tag">Web Api</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/cms/">
+                        <span class="tag">cms</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/this/">
+                        <span class="tag">this</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/">
+                        <span class="tag">万能和声进行</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6/">
+                        <span class="tag">事件</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/">
+                        <span class="tag">事件代理</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/">
+                        <span class="tag">事件冒泡</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/">
+                        <span class="tag">作用域</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B/">
+                        <span class="tag">原型</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/">
+                        <span class="tag">原型链</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%8F%98%E9%87%8F/">
+                        <span class="tag">变量</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%90%8E%E7%AB%AF/">
+                        <span class="tag">后端</span>
+                        <span class="tag is-grey">3</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BA%93/">
+                        <span class="tag">库</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E5%BC%82%E6%AD%A5/">
+                        <span class="tag">异步</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E7%88%AC%E8%99%AB/">
+                        <span class="tag">爬虫</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E9%97%AD%E5%8C%85/">
+                        <span class="tag">闭包</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo.svg" alt="Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2020 John Doe&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+
+<script>
+var IcarusThemeSettings = {
+    site: {
+        url: 'https://www.imuboy.cn',
+        external_link: {"enable":true,"exclude":[]}
+    },
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+
+
+<script src="/js/animation.js"></script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>
