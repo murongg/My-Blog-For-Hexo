@@ -98,12 +98,5 @@ theme: hexo-icarus
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type: ftpsync
-  host: 123.207.138.75
-  user: www_imuboy_cn
-  pass: zmx3TJRMpiWBF4KW
-  remote: /
-  port: 21
-  connections: 1
-  verbose: true
-  delete: true
+  type: git
+  branch: pages
