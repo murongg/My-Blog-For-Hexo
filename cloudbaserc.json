@@ -1,0 +1,19 @@
+{
+  "envId": "blog-6gw2qkadde75921d",
+  "$schema": "https://framework-1258016615.tcloudbaseapp.com/schema/latest.json",
+  "functionRoot": "./functions",
+  "functions": [],
+  "framework": {
+    "name": "hexo-app",
+    "plugins": {
+      "hexo": {
+        "use": "@cloudbase/framework-plugin-website",
+        "inputs": {
+          "buildCommand": "npm run build",
+          "outputPath": "public/",
+          "cloudPath": "/"
+        }
+      }
+    }
+  }
+}

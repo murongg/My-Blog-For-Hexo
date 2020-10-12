@@ -6,12 +6,14 @@
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
-    "server": "hexo server"
+    "server": "hexo server",
+    "publish": "tcb framework deploy"
   },
   "hexo": {
     "version": "4.2.0"
   },
   "dependencies": {
+    "@cloudbase/cli": "^1.0.1",
     "cheerio": "^1.0.0-rc.3",
     "hexo": "^4.0.0",
     "hexo-deployer-ftpsync": "^0.1.1",
