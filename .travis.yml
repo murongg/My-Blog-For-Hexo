@@ -8,7 +8,6 @@ branches:
     - master # build master branch only
 script:
   - hexo generate
-  - npm run publish
 deploy:
   provider: pages
   skip-cleanup: true
