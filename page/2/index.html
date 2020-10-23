@@ -155,6 +155,83 @@
 <div class="card">
     
     <div class="card-image">
+        <a href="/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9A%E7%94%A8%E6%88%B7%E6%A8%A1%E5%9E%8B%E3%80%81%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C%E4%B8%8E%E7%94%A8%E6%88%B7%E6%B3%A8%E5%86%8C%E6%8E%A5%E5%8F%A3/" class="image is-7by1">
+            <img class="thumbnail" src="https://i.picsum.photos/id/123/565/242.jpg" alt="Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2020-02-28T08:25:36.000Z">2020-02-28</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/">WEB后端</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/NodeJs/">NodeJs</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/WEB%E5%90%8E%E7%AB%AF/NodeJs/TypeScript/">TypeScript</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    20 分钟 读完 (大约 2972 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                <a class="has-link-black-ter" href="/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9A%E7%94%A8%E6%88%B7%E6%A8%A1%E5%9E%8B%E3%80%81%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C%E4%B8%8E%E7%94%A8%E6%88%B7%E6%B3%A8%E5%86%8C%E6%8E%A5%E5%8F%A3/">Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口</a>
+            
+        </h1>
+        <div class="content">
+            <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置/">Koa+TypeScript从0到1实现简易CMS框架（一）：项目搭建以及配置</a>  </li>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理/">Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理</a></li>
+<li><a href="/2020/02/28/Koa-TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口/">Koa+TypeScript从0到1实现简易CMS框架（三）：用户模型、参数校验与用户注册接口</a>  </li>
+</ul>
+<p>项目地址：<a href="https://github.com/MuRongXiaoDouBi/koa-typescript-cms">koa-typescript-cms</a> </p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>用户系统是一个cms最重要的部分，也是最复杂的部分，需要进行很多安全处理。<br>每次用户请求接口时，我们要进行参数校验，以防用户传入危险以及不规范数据</p>
+<h2 id="主要工具库"><a href="#主要工具库" class="headerlink" title="主要工具库"></a>主要工具库</h2><ul>
+<li><strong>koa</strong>   web框架</li>
+<li><strong>koa-bodyparser</strong> 处理koa post请求</li>
+<li><strong>koa-router</strong> koa路由</li>
+<li><strong>sequelize、sequelize-typescript、mysql2</strong> ORM框架与Mysql</li>
+<li><strong>validator、class-validator</strong> 参数校验</li>
+<li><strong>jsonwebtoken</strong> jwt</li>
+<li><strong>bcryptjs</strong> 加密工具</li>
+<li><strong>reflect-metadata</strong> 给装饰器添加各种信息</li>
+<li><strong>nodemon</strong> 监听文件改变自动重启服务</li>
+<li><strong>lodash</strong> 非常好用的工具函数库</li>
+</ul>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                <a class="button is-size-7 is-light" href="/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9A%E7%94%A8%E6%88%B7%E6%A8%A1%E5%9E%8B%E3%80%81%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C%E4%B8%8E%E7%94%A8%E6%88%B7%E6%B3%A8%E5%86%8C%E6%8E%A5%E5%8F%A3/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
         <a href="/2020/02/28/Koa-TypeScript%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93CMS%E6%A1%86%E6%9E%B6%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E8%B7%AF%E7%94%B1%E8%87%AA%E5%8A%A8%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/" class="image is-7by1">
             <img class="thumbnail" src="https://i.picsum.photos/id/178/565/242.jpg" alt="Koa+TypeScript从0到1实现简易CMS框架（二）：路由自动加载与全局异常处理">
         </a>
@@ -738,66 +815,6 @@
 
 
 
-    
-<div class="card">
-    
-    <div class="card-image">
-        <a href="/2020/01/15/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81%E3%80%8A%E6%9C%88%E5%8D%8A%E5%BC%AF%EF%BC%88Cover%EF%BC%9A%E9%99%88%E5%9D%A4%EF%BC%89%E3%80%8B/" class="image is-7by1">
-            <img class="thumbnail" src="https://s2.ax1x.com/2020/01/19/1CSUN4.jpg" alt="音乐作品《月半弯（Cover：陈坤）》">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2020-01-15T15:23:33.000Z">2020-01-15</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/">音乐世界</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/%E9%9F%B3%E4%B9%90%E4%B8%96%E7%95%8C/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81/">音乐作品</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    2 分钟 读完 (大约 305 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2020/01/15/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81%E3%80%8A%E6%9C%88%E5%8D%8A%E5%BC%AF%EF%BC%88Cover%EF%BC%9A%E9%99%88%E5%9D%A4%EF%BC%89%E3%80%8B/">音乐作品《月半弯（Cover：陈坤）》</a>
-            
-        </h1>
-        <div class="content">
-            <p>&emsp;&emsp;这是一首普通的流行歌曲，由郝雷作词作曲，张学友演唱，1985 年发行，我把它改编成了偏 R&amp;B 的风格。和弦方面没有太大的改动，最多就是在原有和弦加了几个色彩音！<br>&emsp;&emsp;第一次接触到这首歌是听了皮皮改编的版本，他改编成的风格好像是 Soul，听了之后我就喜欢上了这首歌。个人比较喜欢皮皮改编的版本，毕竟二十年前的编曲实在难征服我的耳朵！</p>
-<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1394618989&auto=0&height=66"></iframe>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2020/01/15/%E9%9F%B3%E4%B9%90%E4%BD%9C%E5%93%81%E3%80%8A%E6%9C%88%E5%8D%8A%E5%BC%AF%EF%BC%88Cover%EF%BC%9A%E9%99%88%E5%9D%A4%EF%BC%89%E3%80%8B/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -864,7 +881,7 @@
                     </p>
                     <a href="/archives">
                         <p class="title has-text-weight-normal">
-                            23
+                            24
                         </p>
                     </a>
                 </div>
@@ -876,7 +893,7 @@
                     </p>
                     <a href="/categories">
                         <p class="title has-text-weight-normal">
-                            16
+                            17
                         </p>
                     </a>
                 </div>
@@ -888,7 +905,7 @@
                     </p>
                     <a href="/tags">
                         <p class="title has-text-weight-normal">
-                            30
+                            32
                         </p>
                     </a>
                 </div>
@@ -1018,7 +1035,7 @@
                 <span class="level-item">程序世界</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">19</span>
+                <span class="level-item tag">20</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">
@@ -1026,7 +1043,7 @@
                 <span class="level-item">JavaScript</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">7</span>
+                <span class="level-item tag">8</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/NodeJs/">
@@ -1103,7 +1120,7 @@
         <h3 class="menu-label">
             标签云
         </h3>
-        <a href="/tags/4536251/" style="font-size: 10px;">4536251</a> <a href="/tags/Ajax/" style="font-size: 10px;">Ajax</a> <a href="/tags/BOM/" style="font-size: 10px;">BOM</a> <a href="/tags/DOM/" style="font-size: 10px;">DOM</a> <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/JavaScript%E5%9F%BA%E7%A1%80/" style="font-size: 16px;">JavaScript基础</a> <a href="/tags/Jazz/" style="font-size: 10px;">Jazz</a> <a href="/tags/Koa/" style="font-size: 14px;">Koa</a> <a href="/tags/Nuxt/" style="font-size: 10px;">Nuxt</a> <a href="/tags/R-B/" style="font-size: 10px;">R&B</a> <a href="/tags/RESTFUL/" style="font-size: 14px;">RESTFUL</a> <a href="/tags/Vue/" style="font-size: 18px;">Vue</a> <a href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" style="font-size: 12px;">Vue源码分析</a> <a href="/tags/Web-Api/" style="font-size: 14px;">Web Api</a> <a href="/tags/cms/" style="font-size: 14px;">cms</a> <a href="/tags/this/" style="font-size: 10px;">this</a> <a href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/" style="font-size: 10px;">万能和声进行</a> <a href="/tags/%E4%BA%8B%E4%BB%B6/" style="font-size: 10px;">事件</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/" style="font-size: 10px;">事件代理</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/" style="font-size: 10px;">事件冒泡</a> <a href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/" style="font-size: 10px;">作用域</a> <a href="/tags/%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/" style="font-size: 10px;">冒泡排序</a> <a href="/tags/%E5%8E%9F%E5%9E%8B/" style="font-size: 10px;">原型</a> <a href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/" style="font-size: 10px;">原型链</a> <a href="/tags/%E5%8F%98%E9%87%8F/" style="font-size: 10px;">变量</a> <a href="/tags/%E5%90%8E%E7%AB%AF/" style="font-size: 14px;">后端</a> <a href="/tags/%E5%BA%93/" style="font-size: 10px;">库</a> <a href="/tags/%E5%BC%82%E6%AD%A5/" style="font-size: 10px;">异步</a> <a href="/tags/%E7%88%AC%E8%99%AB/" style="font-size: 12px;">爬虫</a> <a href="/tags/%E9%97%AD%E5%8C%85/" style="font-size: 10px;">闭包</a>
+        <a href="/tags/4536251/" style="font-size: 10px;">4536251</a> <a href="/tags/Ajax/" style="font-size: 10px;">Ajax</a> <a href="/tags/BOM/" style="font-size: 10px;">BOM</a> <a href="/tags/DOM/" style="font-size: 10px;">DOM</a> <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/JavaScript%E5%9F%BA%E7%A1%80/" style="font-size: 16px;">JavaScript基础</a> <a href="/tags/Jazz/" style="font-size: 10px;">Jazz</a> <a href="/tags/Koa/" style="font-size: 14px;">Koa</a> <a href="/tags/Nuxt/" style="font-size: 10px;">Nuxt</a> <a href="/tags/R-B/" style="font-size: 10px;">R&B</a> <a href="/tags/RESTFUL/" style="font-size: 14px;">RESTFUL</a> <a href="/tags/Vue/" style="font-size: 18px;">Vue</a> <a href="/tags/Vue3/" style="font-size: 10px;">Vue3</a> <a href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" style="font-size: 12px;">Vue源码分析</a> <a href="/tags/Web-Api/" style="font-size: 14px;">Web Api</a> <a href="/tags/cms/" style="font-size: 14px;">cms</a> <a href="/tags/this/" style="font-size: 10px;">this</a> <a href="/tags/%E4%B8%87%E8%83%BD%E5%92%8C%E5%A3%B0%E8%BF%9B%E8%A1%8C/" style="font-size: 10px;">万能和声进行</a> <a href="/tags/%E4%BA%8B%E4%BB%B6/" style="font-size: 10px;">事件</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E4%BB%A3%E7%90%86/" style="font-size: 10px;">事件代理</a> <a href="/tags/%E4%BA%8B%E4%BB%B6%E5%86%92%E6%B3%A1/" style="font-size: 10px;">事件冒泡</a> <a href="/tags/%E4%BD%9C%E7%94%A8%E5%9F%9F/" style="font-size: 10px;">作用域</a> <a href="/tags/%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/" style="font-size: 10px;">冒泡排序</a> <a href="/tags/%E5%8E%9F%E5%9E%8B/" style="font-size: 10px;">原型</a> <a href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/" style="font-size: 10px;">原型链</a> <a href="/tags/%E5%8F%98%E9%87%8F/" style="font-size: 10px;">变量</a> <a href="/tags/%E5%90%8E%E7%AB%AF/" style="font-size: 14px;">后端</a> <a href="/tags/%E5%BA%93/" style="font-size: 10px;">库</a> <a href="/tags/%E5%BC%82%E6%AD%A5/" style="font-size: 10px;">异步</a> <a href="/tags/%E6%87%92%E5%8A%A0%E8%BD%BD/" style="font-size: 10px;">懒加载</a> <a href="/tags/%E7%88%AC%E8%99%AB/" style="font-size: 12px;">爬虫</a> <a href="/tags/%E9%97%AD%E5%8C%85/" style="font-size: 10px;">闭包</a>
     </div>
 </div>
     
@@ -1115,6 +1132,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/10/23/%E4%BD%BF%E7%94%A8vue3-typescript%E7%BC%96%E5%86%99%E4%B8%80%E4%B8%AA%E5%9B%BE%E7%89%87%E6%87%92%E5%8A%A0%E8%BD%BD%E6%8F%92%E4%BB%B6/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="使用vue3+typescript编写一个图片懒加载插件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-10-23T08:22:15.000Z">2020-10-23</time></div>
+                    <a href="/2020/10/23/%E4%BD%BF%E7%94%A8vue3-typescript%E7%BC%96%E5%86%99%E4%B8%80%E4%B8%AA%E5%9B%BE%E7%89%87%E6%87%92%E5%8A%A0%E8%BD%BD%E6%8F%92%E4%BB%B6/" class="title has-link-black-ter is-size-6 has-text-weight-normal">使用vue3+typescript编写一个图片懒加载插件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -1192,25 +1228,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="https://i.picsum.photos/id/112/565/242.jpg" alt="JS-Web-API（三）：Ajax">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:02:45.000Z">2020-03-08</time></div>
-                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（三）：Ajax</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -1221,6 +1238,17 @@
             归档
         </h3>
         <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/10/">
+                <span class="level-start">
+                    <span class="level-item">十月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
         
         <li>
             <a class="level is-marginless" href="/archives/2020/09/">
@@ -1375,6 +1403,13 @@
                 </div>
                 
                 <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue3/">
+                        <span class="tag">Vue3</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
                     <a class="tags has-addons" href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
                         <span class="tag">Vue源码分析</span>
                         <span class="tag is-grey">2</span>
@@ -1482,6 +1517,13 @@
                 <div class="control">
                     <a class="tags has-addons" href="/tags/%E5%BC%82%E6%AD%A5/">
                         <span class="tag">异步</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E6%87%92%E5%8A%A0%E8%BD%BD/">
+                        <span class="tag">懒加载</span>
                         <span class="tag is-grey">1</span>
                     </a>
                 </div>
@@ -1524,6 +1566,25 @@
         
         <article class="media">
             
+            <a href="/2020/10/23/%E4%BD%BF%E7%94%A8vue3-typescript%E7%BC%96%E5%86%99%E4%B8%80%E4%B8%AA%E5%9B%BE%E7%89%87%E6%87%92%E5%8A%A0%E8%BD%BD%E6%8F%92%E4%BB%B6/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="使用vue3+typescript编写一个图片懒加载插件">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-10-23T08:22:15.000Z">2020-10-23</time></div>
+                    <a href="/2020/10/23/%E4%BD%BF%E7%94%A8vue3-typescript%E7%BC%96%E5%86%99%E4%B8%80%E4%B8%AA%E5%9B%BE%E7%89%87%E6%87%92%E5%8A%A0%E8%BD%BD%E6%8F%92%E4%BB%B6/" class="title has-link-black-ter is-size-6 has-text-weight-normal">使用vue3+typescript编写一个图片懒加载插件</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/2020/09/28/ASCII%E7%A0%81%E6%8E%92%E5%BA%8F%EF%BC%88Go%EF%BC%89/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/thumbnail.svg" alt="ASCII码排序（Go）">
@@ -1598,25 +1659,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="https://i.picsum.photos/id/112/565/242.jpg" alt="JS-Web-API（三）：Ajax">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-03-08T18:02:45.000Z">2020-03-08</time></div>
-                    <a href="/2020/03/08/JS-Web-API%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AAjax/" class="title has-link-black-ter is-size-6 has-text-weight-normal">JS-Web-API（三）：Ajax</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/">程序世界</a> / <a class="has-link-grey -link" href="/categories/%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C/JavaScript/">JavaScript</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1627,6 +1669,17 @@
             归档
         </h3>
         <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/10/">
+                <span class="level-start">
+                    <span class="level-item">十月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
         
         <li>
             <a class="level is-marginless" href="/archives/2020/09/">
@@ -1781,6 +1834,13 @@
                 </div>
                 
                 <div class="control">
+                    <a class="tags has-addons" href="/tags/Vue3/">
+                        <span class="tag">Vue3</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
                     <a class="tags has-addons" href="/tags/Vue%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
                         <span class="tag">Vue源码分析</span>
                         <span class="tag is-grey">2</span>
@@ -1888,6 +1948,13 @@
                 <div class="control">
                     <a class="tags has-addons" href="/tags/%E5%BC%82%E6%AD%A5/">
                         <span class="tag">异步</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/%E6%87%92%E5%8A%A0%E8%BD%BD/">
+                        <span class="tag">懒加载</span>
                         <span class="tag is-grey">1</span>
                     </a>
                 </div>
